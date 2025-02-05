@@ -38,8 +38,14 @@ body {
 }
 
 .image-container {
-  width: 100%;
-  height: auto;
+  width: 100%; /* Make the container take the full width */
+  overflow: hidden; /* Hide any overflow */
+}
+
+.image-container img {
+  width: 100%; /* Make the image take the full width of the container */
+  height: auto; /* Allow the height to adjust automatically */
+  display: block; /* Remove any bottom space caused by inline-block */
 }
 
 .content {
