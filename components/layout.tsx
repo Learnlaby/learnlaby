@@ -1,17 +1,21 @@
 import React from "react";
-import Navbar from "./navbar";
-// import Sidebar from "./Sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import AppNavbar from "@/components/app-navbar";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex">
-      {/* <Sidebar /> */}
-      <div className="flex flex-col w-full">
-        <Navbar />
-        <main className="p-6">{children}</main>
+    <SidebarProvider>
+      <div className="flex flex-col h-screen">
+        <AppNavbar />
+        
+        <div className="flex flex-1 mt-20">
+          <AppSidebar />
+          <main className="flex-1 p-4 overflow-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
-};
-
-export default Layout;
+}

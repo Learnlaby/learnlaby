@@ -17,17 +17,17 @@ body {
     align-items: center;
     height: 58px;
 }
-.fabarsIcon, .faplusIcon {
-    color: #8491A5; /* Your desired color */
+.faplusIcon {
+    color: #8491A5;
     font-size: 16px;
 }
 
 /* Sidebar */
-.iconColor {
+.icon {
     color: #526581;
 }
   
-.textColor {
+.text {
     font-size: 14px;
 }
   
