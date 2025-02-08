@@ -3,10 +3,10 @@ body {
 }
 
  /* navbar */
-.learnlabylogo {
+.learnlabyLogo {
     width: 410px;
     position: relative;
-    font-size: 20px;
+    font-size: 18px;
     letter-spacing: 0.04em;
     display: flex;
     font-family: Poppins;
@@ -17,4 +17,20 @@ body {
     align-items: center;
     height: 58px;
 }
+.fabarsIcon, .faplusIcon {
+    color: #8491A5; /* Your desired color */
+    font-size: 16px;
+}
 
+/* Sidebar */
+.iconColor {
+    color: #526581;
+}
+  
+.textColor {
+    font-size: 14px;
+}
+  
+.sidebar_item:hover {
+    background-color: #F3F2F2;
+}
