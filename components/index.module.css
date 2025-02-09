@@ -1,0 +1,36 @@
+body {
+    margin: 0; line-height: normal;
+}
+
+ /* navbar */
+.learnlabyLogo {
+    width: 410px;
+    position: relative;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    display: flex;
+    font-family: Poppins;
+    background: linear-gradient(98.51deg, #d900fe 5%, #1937e0 40%, #1937e0 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: left;
+    align-items: center;
+    height: 58px;
+}
+.faplusIcon {
+    color: #8491A5;
+    font-size: 16px;
+}
+
+/* Sidebar */
+.icon {
+    color: #526581;
+}
+  
+.text {
+    font-size: 14px;
+}
+  
+.sidebar_item:hover {
+    background-color: #F3F2F2;
+}
