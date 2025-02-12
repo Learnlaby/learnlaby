@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { PrismaAdapter } from '@auth/prisma-adapter'
+import GitHubProvider from 'next-auth/providers/github';
 
 
 type User = {
@@ -47,6 +48,10 @@ export const authOptions: AuthOptions = {
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+    GitHubProvider({
+        clientId: process.env.GITHUB_ID,
+        clientSecret: process.env.GITHUB_SECRET,
+      }),
   ],
   adapter: PrismaAdapter(prisma),
   session: {
