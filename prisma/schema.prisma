@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            String       @id @default(cuid())
   name          String?    @db.VarChar(100)
   email         String    @unique @db.VarChar(255)
   password      String?
@@ -33,7 +33,7 @@ model User {
 
 model Account {
   id                String  @id @default(cuid())
-  userId            Int
+  userId            String
   type              String
   provider          String
   providerAccountId String
@@ -44,17 +44,16 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model Classroom {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(cuid())
   name      String   @db.VarChar(255)
   code      String   @unique @db.VarChar(10)
-  ownerId   Int
+  ownerId   String
   createdAt DateTime @default(now())
 
   owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
@@ -64,9 +63,9 @@ model Classroom {
 }
 
 model ClassroomMember {
-  id          Int      @id @default(autoincrement())
-  classroomId Int
-  userId      Int
+  id          String      @id @default(cuid())
+  classroomId String
+  userId      String
   role        String   @db.VarChar(20) // 'student', 'teacher', 'co-teacher'
   joinedAt    DateTime @default(now())
 
@@ -75,9 +74,9 @@ model ClassroomMember {
 }
 
 model StudentProgress {
-  id                   Int      @id @default(autoincrement())
-  studentId            Int
-  classroomId          Int
+  id                   String      @id @default(cuid())
+  studentId            String
+  classroomId          String
   assignmentsCompleted Int
   totalScore           Decimal  @db.Decimal(5, 2)
   lastUpdated          DateTime @updatedAt
@@ -87,9 +86,9 @@ model StudentProgress {
 }
 
 model Post {
-  id               Int       @id @default(autoincrement())
-  classroomId      Int
-  userId           Int
+  id               String       @id @default(cuid())
+  classroomId      String
+  userId           String
   type             String    @db.VarChar(20) // 'announcement', 'material', 'assignment'
   title            String?   @db.VarChar(255)
   content          String?
@@ -106,8 +105,8 @@ model Post {
 }
 
 model Team {
-  id           Int      @id @default(autoincrement())
-  assignmentId Int
+  id           String      @id @default(cuid())
+  assignmentId String
   name         String?  @db.VarChar(255)
   createdAt    DateTime @default(now())
 
@@ -118,9 +117,9 @@ model Team {
 }
 
 model TeamMember {
-  id        Int      @id @default(autoincrement())
-  teamId    Int
-  studentId Int
+  id        String      @id @default(cuid())
+  teamId    String
+  studentId String
   joinedAt  DateTime @default(now())
 
   team    Team @relation(fields: [teamId], references: [id])
@@ -128,10 +127,10 @@ model TeamMember {
 }
 
 model Submission {
-  id          Int      @id @default(autoincrement())
-  postId      Int
-  studentId   Int? // Nullable for team submissions
-  teamId      Int? // Nullable for individual submissions
+  id          String      @id @default(cuid())
+  postId      String
+  studentId   String? // Nullable for team submissions
+  teamId      String? // Nullable for individual submissions
   fileUrl     String
   submittedAt DateTime @default(now())
 
@@ -142,10 +141,10 @@ model Submission {
 }
 
 model Grade {
-  id           Int      @id @default(autoincrement())
-  submissionId Int
-  studentId    Int? // Nullable if team submission
-  teamId       Int? // Nullable if individual submission
+  id           String      @id @default(cuid())
+  submissionId String
+  studentId    String? // Nullable if team submission
+  teamId       String? // Nullable if individual submission
   score        Decimal  @db.Decimal(5, 2)
   feedback     String?
   gradedAt     DateTime @default(now())
@@ -156,9 +155,9 @@ model Grade {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  postId    Int
+  id        String      @id @default(cuid())
+  userId    String
+  postId    String
   content   String
   createdAt DateTime @default(now())
 

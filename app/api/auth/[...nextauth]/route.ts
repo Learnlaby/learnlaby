@@ -7,7 +7,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 
 
 type User = {
-  id: number
+  id: string
   name: string
   email: string
   password: string
