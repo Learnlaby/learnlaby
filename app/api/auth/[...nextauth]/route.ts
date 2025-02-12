@@ -1,11 +1,13 @@
+import GoogleProvider from 'next-auth/providers/google';
 import NextAuth, { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 
+
 type User = {
-  id: string
+  id: number
   name: string
   email: string
   password: string
@@ -40,6 +42,10 @@ export const authOptions: AuthOptions = {
           email: user.email,
         }
       },
+    }),
+    GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
   adapter: PrismaAdapter(prisma),
