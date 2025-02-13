@@ -17,7 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const user = await prisma.user.create({
       data: {
         email,
-        password: hashedPassword, // Ensure the field matches your schema
+        password: hashedPassword,
         name,
       },
     })
