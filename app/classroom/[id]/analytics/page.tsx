@@ -31,7 +31,7 @@ const students = [
   {
     name: "XXXXX XXXXXX",
     id: "6510545xxx",
-    email: "xxxxxxxxxx@ku.th",
+    email: "xxxxxxxxxy@ku.th",
     performance: "-4%",
     status: "Lorem ipsum dolor",
     avatarColor: "bg-blue-100",
@@ -39,7 +39,7 @@ const students = [
   {
     name: "XXXXX XXXXXX",
     id: "6510545xxx",
-    email: "xxxxxxxxxx@ku.th",
+    email: "xxxxxxxxxz@ku.th",
     performance: "+25%",
     status: "Lorem ipsum dolor",
     avatarColor: "bg-yellow-100",
