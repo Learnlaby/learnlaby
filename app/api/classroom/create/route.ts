@@ -7,8 +7,6 @@ const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
-
-    console.log(session)
     
     try {
         const bodyText = await request.text();
@@ -32,6 +30,14 @@ export async function POST(request: Request) {
                 description,
                 image,
                 ownerId
+            },
+        });
+
+        await prisma.classroomMember.create({
+            data: {
+                classroomId: classroom.id,
+                userId: ownerId,
+                role: "teacher",
             },
         });
 
