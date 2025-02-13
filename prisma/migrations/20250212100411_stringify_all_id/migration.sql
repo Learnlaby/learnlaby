@@ -1,20 +1,41 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
-    "name" VARCHAR(100) NOT NULL,
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(100),
     "email" VARCHAR(255) NOT NULL,
-    "passwordHash" TEXT NOT NULL,
+    "password" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "emailVerified" TIMESTAMP(3),
+    "image" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "Account" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "providerAccountId" TEXT NOT NULL,
+    "refresh_token" TEXT,
+    "access_token" TEXT,
+    "expires_at" INTEGER,
+    "token_type" TEXT,
+    "scope" TEXT,
+    "id_token" TEXT,
+    "session_state" TEXT,
+
+    CONSTRAINT "Account_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Classroom" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "code" VARCHAR(10) NOT NULL,
-    "ownerId" INTEGER NOT NULL,
+    "ownerId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Classroom_pkey" PRIMARY KEY ("id")
@@ -22,9 +43,9 @@ CREATE TABLE "Classroom" (
 
 -- CreateTable
 CREATE TABLE "ClassroomMember" (
-    "id" SERIAL NOT NULL,
-    "classroomId" INTEGER NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "classroomId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "role" VARCHAR(20) NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -33,9 +54,9 @@ CREATE TABLE "ClassroomMember" (
 
 -- CreateTable
 CREATE TABLE "StudentProgress" (
-    "id" SERIAL NOT NULL,
-    "studentId" INTEGER NOT NULL,
-    "classroomId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "classroomId" TEXT NOT NULL,
     "assignmentsCompleted" INTEGER NOT NULL,
     "totalScore" DECIMAL(5,2) NOT NULL,
     "lastUpdated" TIMESTAMP(3) NOT NULL,
@@ -45,9 +66,9 @@ CREATE TABLE "StudentProgress" (
 
 -- CreateTable
 CREATE TABLE "Post" (
-    "id" SERIAL NOT NULL,
-    "classroomId" INTEGER NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "classroomId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
     "type" VARCHAR(20) NOT NULL,
     "title" VARCHAR(255),
     "content" TEXT,
@@ -61,8 +82,8 @@ CREATE TABLE "Post" (
 
 -- CreateTable
 CREATE TABLE "Team" (
-    "id" SERIAL NOT NULL,
-    "assignmentId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "assignmentId" TEXT NOT NULL,
     "name" VARCHAR(255),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -71,9 +92,9 @@ CREATE TABLE "Team" (
 
 -- CreateTable
 CREATE TABLE "TeamMember" (
-    "id" SERIAL NOT NULL,
-    "teamId" INTEGER NOT NULL,
-    "studentId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "teamId" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
     "joinedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "TeamMember_pkey" PRIMARY KEY ("id")
@@ -81,10 +102,10 @@ CREATE TABLE "TeamMember" (
 
 -- CreateTable
 CREATE TABLE "Submission" (
-    "id" SERIAL NOT NULL,
-    "postId" INTEGER NOT NULL,
-    "studentId" INTEGER,
-    "teamId" INTEGER,
+    "id" TEXT NOT NULL,
+    "postId" TEXT NOT NULL,
+    "studentId" TEXT,
+    "teamId" TEXT,
     "fileUrl" TEXT NOT NULL,
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -93,10 +114,10 @@ CREATE TABLE "Submission" (
 
 -- CreateTable
 CREATE TABLE "Grade" (
-    "id" SERIAL NOT NULL,
-    "submissionId" INTEGER NOT NULL,
-    "studentId" INTEGER,
-    "teamId" INTEGER,
+    "id" TEXT NOT NULL,
+    "submissionId" TEXT NOT NULL,
+    "studentId" TEXT,
+    "teamId" TEXT,
     "score" DECIMAL(5,2) NOT NULL,
     "feedback" TEXT,
     "gradedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -106,9 +127,9 @@ CREATE TABLE "Grade" (
 
 -- CreateTable
 CREATE TABLE "Comment" (
-    "id" SERIAL NOT NULL,
-    "userId" INTEGER NOT NULL,
-    "postId" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "postId" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -119,7 +140,13 @@ CREATE TABLE "Comment" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Classroom_code_key" ON "Classroom"("code");
+
+-- AddForeignKey
+ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Classroom" ADD CONSTRAINT "Classroom_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
