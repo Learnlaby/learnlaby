@@ -1,15 +1,22 @@
 import { PrismaClient } from "@prisma/client";
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from "../../auth/[...nextauth]/route";
+
 
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
+    const session = await getServerSession(authOptions)
+
+    console.log(session)
+    
     try {
         const bodyText = await request.text();
         const { 
             name, 
             description = "", 
             image = "", 
-            ownerId = "cm71r6gx20000gplodcp6yxtc" 
+            ownerId = session && session.user ? (session.user as { id: string }).id : null 
         } = JSON.parse(bodyText);
 
         if (!name) {
