@@ -35,7 +35,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="classroom-card-container">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         {loading && <p>Loading classrooms...</p>}
         {error && <p>Error: {error}</p>}
         {!loading && !error && classrooms.length === 0 && <p>No classrooms found.</p>}
