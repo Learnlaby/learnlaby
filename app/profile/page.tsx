@@ -7,7 +7,6 @@ import { useEffect } from 'react'
 type SessionUser = {
   name?: string
   email?: string
-  role?: string
 }
 
 export default function Profile() {
@@ -31,7 +30,6 @@ export default function Profile() {
           Welcome, <b>{user.name}!</b>
         </p>
         <p>Email: {user.email}</p>
-        <p>Role: {user.role}</p>
         <button
           onClick={() => signOut({ callbackUrl: '/' })}
           className="w-full bg-blue-500 text-white py-2 rounded"
