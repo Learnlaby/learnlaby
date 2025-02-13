@@ -52,9 +52,11 @@ model Account {
 model Classroom {
   id        String      @id @default(cuid())
   name      String   @db.VarChar(255)
-  code      String   @unique @db.VarChar(10)
+  code      String   @unique @default(cuid())
   ownerId   String
   createdAt DateTime @default(now())
+  image         String?
+  description         String?
 
   owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
   posts           Post[]
