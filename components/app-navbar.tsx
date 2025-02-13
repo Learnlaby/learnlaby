@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { FaBars, FaPlus } from "react-icons/fa";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import styles from './index.module.css';
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 const AppNavbar = () => {
     const [showPopup, setShowPopup] = useState(false);
@@ -15,6 +17,7 @@ const AppNavbar = () => {
         image: "",
         description: "",
     });
+    const { data: session } = useSession()
 
     // Toggle for main popup
     const togglePopup = () => { setShowPopup(!showPopup); };
@@ -69,7 +72,7 @@ const AppNavbar = () => {
             const response = await fetch("/api/classroom/join", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: classCode }),
+                body: JSON.stringify({ classroomCode: classCode }),
             });
 
             if (!response.ok) throw new Error("Failed to join classroom");
@@ -118,7 +121,17 @@ const AppNavbar = () => {
                     )}
 
                     <button className="p-1 rounded-full hover:bg-gray-200">
-                        <div className="w-8 h-8 rounded-full bg-purple-300"></div>
+                        <a href="/profile">
+                            {session && session.user && (
+                                <Image
+                                    src={session.user.image || "/default-profile.png"}
+                                    alt={session.user.name || "User profile"}
+                                    className="rounded-full w-8 h-8"
+                                    width={80}
+                                    height={80}
+                                />
+                            )}
+                        </a>
                     </button>
                 </div>
             </nav>
