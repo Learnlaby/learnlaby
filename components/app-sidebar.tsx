@@ -1,4 +1,6 @@
-import React from "react";
+'use client'
+
+import React, { useEffect, useState } from "react";
 import { FaHome, FaCalendar, FaClipboardList, FaBook } from "react-icons/fa";
 import {
   Sidebar,
@@ -11,32 +13,47 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import styles from './index.module.css';
+import Image from "next/image";
 
-// Menu items. Home, calendar, registered, to do list, and classes
+// Menu items: Home, Calendar, Registered, To-Do List
 const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: FaHome,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: FaCalendar,
-  },
-  {
-    title: "Registered",
-    url: "#",
-    icon: FaBook,
-  },
-  {
-    title: "To Do List",
-    url: "#",
-    icon: FaClipboardList,
-  },
+  { title: "Home", url: "/home", icon: FaHome },
+  { title: "Calendar", url: "#", icon: FaCalendar },
+  { title: "Registered", url: "#", icon: FaBook },
+  { title: "To Do List", url: "#", icon: FaClipboardList },
 ];
 
+// Classroom interface
+interface Classroom {
+  id: string;
+  image: string;
+  name: string;
+}
+
 export function AppSidebar() {
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user classrooms
+  useEffect(() => {
+    const fetchClassrooms = async () => {
+      try {
+        const response = await fetch("/api/classroom");
+        if (!response.ok) throw new Error("Failed to fetch classrooms");
+
+        const data: Classroom[] = await response.json();
+        setClassrooms(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClassrooms();
+  }, []);
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -63,12 +80,31 @@ export function AppSidebar() {
           <SidebarGroupLabel>Classes</SidebarGroupLabel>
           <SidebarGroupContent className="pl-3">
             <div className="space-y-2">
-              {["Class A", "Class B", "Class C", "Class D"].map((className) => (
-                <div key={className} className="flex items-center gap-3 p-0.5 rounded-lg">
-                  <div className="w-7 h-7 rounded-full bg-purple-300"></div>
-                  <span className="textColor">{className}</span>
-                </div>
-              ))}
+              {loading ? (
+                <p>Loading classes...</p>
+              ) : error ? (
+                <p className="text-red-500">Error: {error}</p>
+              ) : classrooms.length === 0 ? (
+                <p className="text-gray-500">No joined classes</p>
+              ) : (
+                classrooms.map((classroom) => (
+                  <div
+                    key={classroom.id}
+                    className="flex items-center gap-3 p-0.5 rounded-lg"
+                  >
+                    <Image
+                        src={classroom.image || "https://placehold.co/10x10"}
+                        alt={classroom.name || "Classroom profile"}
+                        className="rounded-full w-7 h-7"
+                        width={80}
+                        height={80}
+                    />
+                    <a href={`/classroom/${classroom.id}/stream`} className="textColor">
+                      {classroom.name}
+                    </a>
+                  </div>
+                ))
+              )}
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
