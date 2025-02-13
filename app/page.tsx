@@ -21,7 +21,7 @@ export default function SignIn() {
       if (result && result.error) {
         console.error(result.error)
       } else {
-        router.push('/profile')
+        router.push('/home')
       }
     } catch (error) {
       console.log('error', error)
