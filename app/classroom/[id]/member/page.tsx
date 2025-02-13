@@ -2,26 +2,11 @@
 // import { ScrollArea } from "@/components/ui/scroll-area"
 import React from 'react'
 
-import {
-  Home,
-  Calendar,
-  ClipboardList,
-  GraduationCap,
-  BarChart3,
-  BookOpen,
-  Users,
-  BadgeIcon as GradeIcon,
-} from "lucide-react"
-import Link from "next/link"
-import ClassroomNavbar from '@/components/ClassroomNavbar'
-
 export default function PeoplePage() {
   return (
     <div className="flex h-screen bg-background">
       {/* Main Content */}
       <div className="flex-1">
-        <ClassroomNavbar />
-
         {/* People List */}
         {/* <ScrollArea className="h-[calc(100vh-4rem)] p-6"> */}
           <div className="space-y-8">
