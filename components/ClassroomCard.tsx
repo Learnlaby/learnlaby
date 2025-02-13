@@ -1,26 +1,36 @@
-import Image from 'next/image';
-import React from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
-const ClassroomCard = () => {
+interface ClassroomCardProps {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
+
+const ClassroomCard: React.FC<ClassroomCardProps> = ({ id, name, description, image }) => {
   return (
-    <li className='classroom-card' aria-label="Classroom Card">
-      <article>
-        <div className="image-container">
-          <Image 
-            src="https://placehold.co/216x160" 
-            alt="Classroom Image" 
-            width={216} // Set the width
-            height={160} // Set the height
-            layout="responsive" // This will maintain the aspect ratio
-          />
-        </div>
-        <div className="content">
-          <h3>Classroom Name</h3>
-          <p>Classroom Description</p>
-        </div>
-      </article>
+    <li className="classroom-card" aria-label="Classroom Card">
+      <Link href={`/classroom/${id}/stream`} className="card-link">
+        <article>
+          <div className="image-container">
+            <Image
+              src={image}
+              alt="Classroom Image"
+              width={216}
+              height={160}
+              layout="responsive"
+            />
+          </div>
+          <div className="content">
+            <h3>{name}</h3>
+            <p>{description}</p>
+          </div>
+        </article>
+      </Link>
     </li>
   );
-}
+};
 
 export default ClassroomCard;
