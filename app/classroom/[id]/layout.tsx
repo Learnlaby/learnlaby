@@ -1,3 +1,4 @@
+import ClassroomNavbar from "@/components/ClassroomNavbar";
 import Layout from "@/components/layout";
 
 export default function ClassroomLayout({
@@ -5,5 +6,10 @@ export default function ClassroomLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <Layout>{children}</Layout>;
+  return (
+  <Layout>
+    <ClassroomNavbar />
+    {children}
+  </Layout>)
+  ;
 }
