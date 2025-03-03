@@ -1,0 +1,168 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?    @db.VarChar(100)
+  email         String    @unique @db.VarChar(255)
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  emailVerified DateTime?
+  image         String?
+
+  accounts         Account[]
+  classrooms       Classroom[]       @relation("ClassroomOwner")
+  classroomMembers ClassroomMember[]
+  posts            Post[]
+  comments         Comment[]
+  submissions      Submission[]
+  teamMemberships  TeamMember[]
+  studentProgress  StudentProgress[]
+  grades           Grade[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Classroom {
+  id        String      @id @default(cuid())
+  name      String   @db.VarChar(255)
+  code      String   @unique @default(cuid())
+  ownerId   String
+  createdAt DateTime @default(now())
+  image         String?
+  description         String?
+
+  owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
+  posts           Post[]
+  members         ClassroomMember[]
+  studentProgress StudentProgress[]
+}
+
+model ClassroomMember {
+  id          String      @id @default(cuid())
+  classroomId String
+  userId      String
+  role        String   @db.VarChar(20) // 'student', 'teacher', 'co-teacher'
+  joinedAt    DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model StudentProgress {
+  id                   String      @id @default(cuid())
+  studentId            String
+  classroomId          String
+  assignmentsCompleted Int
+  totalScore           Decimal  @db.Decimal(5, 2)
+  lastUpdated          DateTime @updatedAt
+
+  student   User      @relation(fields: [studentId], references: [id])
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+}
+
+model Post {
+  id               String       @id @default(cuid())
+  classroomId      String
+  userId           String
+  type             String    @db.VarChar(20) // 'announcement', 'material', 'assignment'
+  title            String?   @db.VarChar(255)
+  content          String?
+  fileUrl          String?
+  dueDate          DateTime?
+  isTeamAssignment Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+
+  classroom   Classroom    @relation(fields: [classroomId], references: [id])
+  author      User         @relation(fields: [userId], references: [id])
+  comments    Comment[]
+  teams       Team[]
+  submissions Submission[]
+}
+
+model Team {
+  id           String      @id @default(cuid())
+  assignmentId String
+  name         String?  @db.VarChar(255)
+  createdAt    DateTime @default(now())
+
+  assignment  Post         @relation(fields: [assignmentId], references: [id])
+  members     TeamMember[]
+  submissions Submission[]
+  grades      Grade[]
+}
+
+model TeamMember {
+  id        String      @id @default(cuid())
+  teamId    String
+  studentId String
+  joinedAt  DateTime @default(now())
+
+  team    Team @relation(fields: [teamId], references: [id])
+  student User @relation(fields: [studentId], references: [id])
+}
+
+model Submission {
+  id          String      @id @default(cuid())
+  postId      String
+  studentId   String? // Nullable for team submissions
+  teamId      String? // Nullable for individual submissions
+  fileUrl     String
+  submittedAt DateTime @default(now())
+
+  post    Post    @relation(fields: [postId], references: [id])
+  student User?   @relation(fields: [studentId], references: [id])
+  team    Team?   @relation(fields: [teamId], references: [id])
+  grades  Grade[]
+}
+
+model Grade {
+  id           String      @id @default(cuid())
+  submissionId String
+  studentId    String? // Nullable if team submission
+  teamId       String? // Nullable if individual submission
+  score        Decimal  @db.Decimal(5, 2)
+  feedback     String?
+  gradedAt     DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+  student    User?      @relation(fields: [studentId], references: [id])
+  team       Team?      @relation(fields: [teamId], references: [id])
+}
+
+model Comment {
+  id        String      @id @default(cuid())
+  userId    String
+  postId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+}
