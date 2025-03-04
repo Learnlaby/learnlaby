@@ -20,7 +20,7 @@ const items = [
   { title: "Home", url: "/home", icon: FaHome },
   { title: "Calendar", url: "#", icon: FaCalendar },
   { title: "Registered", url: "#", icon: FaBook },
-  { title: "To Do List", url: "#", icon: FaClipboardList },
+  { title: "To Do List", url: "/to-do", icon: FaClipboardList },
 ];
 
 // Classroom interface
