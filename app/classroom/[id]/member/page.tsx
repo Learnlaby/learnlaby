@@ -69,7 +69,12 @@ export default function PeoplePage() {
                     <AvatarImage src={teacher.image || "https://placekitten.com/100/100"} alt={teacher.name} />
                     <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <span>{teacher.name}</span>
+                  <div className="flex flex-col">
+                    <span>{teacher.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {teacher.role === "co-teacher" ? "Co-Teacher" : "Teacher"}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
