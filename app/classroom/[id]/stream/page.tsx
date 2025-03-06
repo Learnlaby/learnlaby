@@ -124,7 +124,7 @@ const StreamPage = () => {
 
       {/* Create Post Section */}
       <div className="px-6 py-4 border-b">
-        <h2 className="text-xl font-semibold mb-4">Create a Post</h2>
+        <h2 className="text-xl font-semibold mb-4">Create an Announcement</h2>
         <form onSubmit={handlePostSubmit}>
           <textarea
             className="w-full p-3 border rounded-lg"
