@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,7 @@ export default function Classwork() {
   const [newTopic, setNewTopic] = useState<string>("");
 
   const params = useParams();
+  const router = useRouter();
   const classroomId = params?.id as string;
 
   useEffect(() => {
@@ -65,6 +66,10 @@ export default function Classwork() {
     fetchClasswork();
   }, [classroomId]);
 
+  const handleNavigation = (type: string) => {
+    router.push(`/classroom/${classroomId}/classwork/create/assignment?type=${type}`);
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading classwork...</div>;
   }
@@ -89,9 +94,9 @@ export default function Classwork() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setShowTopicDialog(true)}>Topic</DropdownMenuItem>
-            <DropdownMenuItem>Assignment</DropdownMenuItem>
-            <DropdownMenuItem>Material</DropdownMenuItem>
-            <DropdownMenuItem>Question</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("assignment")}>Assignment</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("material")}>Material</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("question")}>Question</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
