@@ -3,9 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { MoreVertical, FileText, SquareUserRound } from "lucide-react";
+import { MoreVertical, FileText, SquareUserRound, Plus } from "lucide-react";
 import { format } from "date-fns";
-
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export default function Classwork() {
   const [assignments, setAssignments] = useState<{ id: string; title: string; content: string; fileUrl?: string; dueDate?: string; createdAt: string }[]>([]);
@@ -56,10 +62,25 @@ export default function Classwork() {
 
   return (
     <div className="p-10">
-      <a href="#" className="text-purple-600 flex items-center mb-10">
-        <SquareUserRound className="w-6 h-6 mr-2 text-purple-600" />
-        View your work
-      </a>
+      <div className="flex items-center justify-between mb-10">
+        <a href="#" className="text-purple-600 flex items-center">
+          <SquareUserRound className="w-6 h-6 mr-2 text-purple-600" />
+          View your work
+        </a>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="bg-purple-600 text-white rounded-full px-4 py-2 flex items-center">
+              <Plus className="w-4 h-4 mr-2" /> Create
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem>Assignment</DropdownMenuItem>
+            <DropdownMenuItem>Material</DropdownMenuItem>
+            <DropdownMenuItem>Question</DropdownMenuItem>
+            <DropdownMenuItem>Topic</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <div>
         <div className="flex justify-between items-center pb-2 border-b border-gray-300">
