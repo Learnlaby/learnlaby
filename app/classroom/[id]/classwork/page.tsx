@@ -67,7 +67,7 @@ export default function Classwork() {
   }, [classroomId]);
 
   const handleNavigation = (type: string) => {
-    router.push(`/classroom/${classroomId}/classwork/create/assignment?type=${type}`);
+    router.push(`/classroom/${classroomId}/classwork/create/classwork?type=${type}`);
   };
 
   if (loading) {
@@ -94,9 +94,9 @@ export default function Classwork() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setShowTopicDialog(true)}>Topic</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigation("assignment")}>Assignment</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigation("material")}>Material</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigation("question")}>Question</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("Assignment")}>Assignment</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("Material")}>Material</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleNavigation("Question")}>Question</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
