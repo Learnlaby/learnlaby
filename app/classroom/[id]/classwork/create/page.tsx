@@ -41,26 +41,35 @@ export default function CreateClasswork() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/classroom/posts/assignment/create", {
+      // Determine the API endpoint based on type
+      let apiEndpoint = "/api/classroom/posts/assignment/create";
+      const requestBody: { classroomId: string; title: string; content: string; dueDate?: string | null } = {
+        classroomId,
+        title,
+        content: instructions,
+      };
+
+      if (type === "Assignment") {
+        requestBody.dueDate = dueDate ? dueDate.toISOString() : null;
+      } else if (type === "Material") {
+        apiEndpoint = "/api/classroom/posts/material/create"; // Change endpoint for Material
+      }
+
+      const response = await fetch(apiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          classroomId,
-          title,
-          content: instructions,
-          dueDate: dueDate ? dueDate.toISOString() : null
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create assignment.");
+        throw new Error(`Failed to create ${type.toLowerCase()}.`);
       }
 
       // Redirect to classwork page
       router.push(`/classroom/${classroomId}/classwork`);
     } catch (error) {
-      console.error("Error creating assignment:", error);
-      alert("Error creating assignment.");
+      console.error(`Error creating ${type.toLowerCase()}:`, error);
+      alert(`Error creating ${type.toLowerCase()}.`);
     } finally {
       setLoading(false);
     }
