@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,7 +66,7 @@ export default function Classwork() {
   }, [classroomId]);
 
   const handleNavigation = (type: string) => {
-    router.push(`/classroom/${classroomId}/classwork/create/classwork?type=${type}`);
+    router.push(`/classroom/${classroomId}/classwork/create?type=${type}`);
   };
 
   if (loading) {
@@ -93,15 +92,15 @@ export default function Classwork() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setShowTopicDialog(true)}>Topic</DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={() => setShowTopicDialog(true)}>Topic</DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => handleNavigation("Assignment")}>Assignment</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleNavigation("Material")}>Material</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigation("Question")}>Question</DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={() => handleNavigation("Question")}>Question</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <Dialog open={showTopicDialog} onOpenChange={setShowTopicDialog}>
+      {/* <Dialog open={showTopicDialog} onOpenChange={setShowTopicDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New Topic</DialogTitle>
@@ -117,7 +116,7 @@ export default function Classwork() {
             <Button onClick={() => setShowTopicDialog(false)} className="bg-purple-600 text-white">Add</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <div>
         <div className="flex justify-between items-center pb-2 border-b border-gray-300">
