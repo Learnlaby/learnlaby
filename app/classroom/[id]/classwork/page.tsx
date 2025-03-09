@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoreVertical, FileText, SquareUserRound, Plus } from "lucide-react";
-import { format } from "date-fns";
+import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen } from "lucide-react";
+import { format, isPast } from "date-fns";
 
 export default function Classwork() {
   const [classMaterials, setClassMaterials] = useState<
@@ -130,7 +130,14 @@ export default function Classwork() {
           classMaterials.map((material) => (
             <Card key={material.id} className="my-2 mt-transparent shadow-none border-none">
               <CardHeader className="flex flex-row items-center space-x-3 p-2">
-                <FileText className="text-gray-500" />
+                {material.type === "assignment" ? (
+                  <NotebookPen
+                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"
+                      }`}
+                  />
+                ) : (
+                  <NotebookText className="w-6 h-6 text-gray-500" />
+                )}
                 <CardTitle className="text-base font-normal flex items-center justify-between w-full">
                   <a href={material.fileUrl || "#"} className="text-gray-600">
                     {material.title}

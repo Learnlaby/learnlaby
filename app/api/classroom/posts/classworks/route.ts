@@ -76,7 +76,8 @@ export async function POST(request: Request) {
                 content: true,
                 fileUrl: true,
                 dueDate: true,
-                createdAt: true
+                createdAt: true,
+                type: true
             },
             orderBy: { createdAt: "desc" }
         });
