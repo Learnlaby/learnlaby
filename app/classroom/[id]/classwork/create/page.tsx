@@ -52,7 +52,7 @@ export default function CreateClasswork() {
       if (type === "Assignment") {
         requestBody.dueDate = dueDate ? dueDate.toISOString() : null;
       } else if (type === "Material") {
-        apiEndpoint = "/api/classroom/posts/material/create"; // Change endpoint for Material
+        apiEndpoint = "/api/classroom/posts/material/create";
       }
 
       const response = await fetch(apiEndpoint, {
@@ -90,7 +90,7 @@ export default function CreateClasswork() {
       </div>
 
       <div className="flex flex-1 flex-col md:flex-row">
-        {/* Assignment form */}
+        {/* Assignment/Material form */}
         <div className="flex-1 p-4">
           <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
             <input
@@ -128,10 +128,12 @@ export default function CreateClasswork() {
           </div>
         </div>
 
-        {/* Settings */}
-        <div className="w-full md:w-80 p-4 border-t md:border-t-0 md:border-l bg-white">
-          <div className="space-y-6">
-            {/* <div>
+        {/* Settings (only for assignments) */}
+
+        {type === "Assignment" && (
+          <div className="w-full md:w-80 p-4 border-t md:border-t-0 md:border-l bg-white">
+            <div className="space-y-6">
+              {/* <div>
               <p className="text-sm text-black-500 mb-2">Assign to</p>
               <div className="relative">
                 <div className="w-full p-2 border rounded-md flex items-center justify-between">
@@ -142,7 +144,7 @@ export default function CreateClasswork() {
               </div>
             </div> */}
 
-            {/* <div>
+              {/* <div>
               <p className="text-sm text-black-500 mb-2">Points</p>
               <div className="relative">
                 <select 
@@ -162,21 +164,21 @@ export default function CreateClasswork() {
               </div>
             </div> */}
 
-            <div>
-              <p className="text-sm text-black-500 mb-2">Due</p>
-              <div className="relative">
-                {/* MUI DateTimePicker integration */}
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={["DateTimePicker"]}>
-                  <DateTimePicker
-                    value={dueDate}
-                    onChange={(newValue) => setDueDate(newValue)}
-                  />
-                </DemoContainer>
-              </LocalizationProvider>
+              <div>
+                <p className="text-sm text-black-500 mb-2">Due</p>
+                <div className="relative">
+                  {/* MUI DateTimePicker integration */}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DateTimePicker"]}>
+                      <DateTimePicker
+                        value={dueDate}
+                        onChange={(newValue) => setDueDate(newValue)}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </div>
               </div>
-            </div>
-            {/* <div>
+              {/* <div>
               <p className="text-sm text-black-500 mb-2">Topic</p>
               <div className="relative mb-10">
                 <select className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600">
@@ -187,8 +189,9 @@ export default function CreateClasswork() {
                 </div>
               </div>
             </div> */}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
