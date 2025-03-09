@@ -12,17 +12,19 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from "dayjs";
 
 export default function CreateClasswork() {
   const params = useParams();
   const searchParams = useSearchParams();
   const classroomId = params?.id as string;
   const type = searchParams?.get("type") || "Assignment";
-  const [dueDate, setDueDate] = React.useState(null);
-  
+  const [dueDate, setDueDate] = useState<dayjs.Dayjs | null>(null);
+
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
   const [points, setPoints] = useState(100);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
@@ -30,8 +32,38 @@ export default function CreateClasswork() {
     console.log("Classroom ID:", classroomId);
   }, [classroomId]);
 
-  const handleCreateClick = () => {
-    router.push(`/classroom/${classroomId}/classwork`);
+  const handleCreateClick = async () => {
+    if (!classroomId || !title) {
+      alert("Classroom ID and title are required.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/classroom/posts/assignment/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          classroomId,
+          title,
+          content: instructions,
+          dueDate: dueDate ? dueDate.toISOString() : null
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create assignment.");
+      }
+
+      // Redirect to classwork page
+      router.push(`/classroom/${classroomId}/classwork`);
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+      alert("Error creating assignment.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,7 +74,9 @@ export default function CreateClasswork() {
           <h2 className="text-lg">{type}</h2>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Button className="bg-purple-600 text-white mr-3" onClick={handleCreateClick}>Create</Button>
+          <Button className="bg-purple-600 text-white mr-3" onClick={handleCreateClick} disabled={loading}>
+            {loading ? "Creating..." : "Create"}
+          </Button>
         </div>
       </div>
 
@@ -50,22 +84,22 @@ export default function CreateClasswork() {
         {/* Assignment form */}
         <div className="flex-1 p-4">
           <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Title"
               className="w-full border-b border-gray-300 py-2 mb-4 focus:outline-none focus:border-purple-500"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            
-            <textarea 
+
+            <textarea
               placeholder="Instructions (optional)"
               className="w-full min-h-32 py-2 mb-4 focus:outline-none"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
             />
 
-            <div className="flex space-x-4 border-t pt-4">
+            {/* <div className="flex space-x-4 border-t pt-4">
               <button>
                 <Bold className="text-black w-5 h-5 rounded hover:bg-gray-200" />
               </button>
@@ -81,14 +115,14 @@ export default function CreateClasswork() {
               <button>
                 <Link className="text-black w-5 h-5 rounded hover:bg-gray-200" />
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Settings */}
         <div className="w-full md:w-80 p-4 border-t md:border-t-0 md:border-l bg-white">
           <div className="space-y-6">
-            <div>
+            {/* <div>
               <p className="text-sm text-black-500 mb-2">Assign to</p>
               <div className="relative">
                 <div className="w-full p-2 border rounded-md flex items-center justify-between">
@@ -97,9 +131,9 @@ export default function CreateClasswork() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <p className="text-sm text-black-500 mb-2">Points</p>
               <div className="relative">
                 <select 
@@ -117,29 +151,23 @@ export default function CreateClasswork() {
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             <div>
               <p className="text-sm text-black-500 mb-2">Due</p>
               <div className="relative">
                 {/* MUI DateTimePicker integration */}
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DemoContainer components={['DateTimePicker']}>
-                    <DateTimePicker
-                      value={dueDate}
-                      onChange={(newValue) => setDueDate(newValue)}
-                      renderInput={(props) => (
-                        <input
-                          {...props}
-                          className="w-full p-2 text-sm border border-gray-400 rounded-md appearance-none bg-white text-gray-600 font-poppins" // Added font-poppins and border color
-                        />
-                      )}
-                    />
-                  </DemoContainer>
-                </LocalizationProvider>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={["DateTimePicker"]}>
+                  <DateTimePicker
+                    value={dueDate}
+                    onChange={(newValue) => setDueDate(newValue)}
+                  />
+                </DemoContainer>
+              </LocalizationProvider>
               </div>
             </div>
-            <div>
+            {/* <div>
               <p className="text-sm text-black-500 mb-2">Topic</p>
               <div className="relative mb-10">
                 <select className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600">
@@ -149,7 +177,7 @@ export default function CreateClasswork() {
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
