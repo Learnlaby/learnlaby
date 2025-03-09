@@ -43,7 +43,7 @@ export default function Classwork() {
       }
 
       try {
-        const response = await fetch("/api/classroom/posts/assignment", {
+        const response = await fetch("/api/classroom/posts/classworks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
