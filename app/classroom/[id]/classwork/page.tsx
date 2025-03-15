@@ -34,7 +34,8 @@ export default function Classwork() {
 
   const params = useParams();
   const router = useRouter();
-  const classroomId = params?.id as string;
+  const classroomId = params?.id as string;  // Gets classroom ID
+  const { type, itemId } = params;  // Retrieves type and itemId from the URL
 
   useEffect(() => {
     async function fetchClassMaterials() {
@@ -128,20 +129,25 @@ export default function Classwork() {
 
         {classMaterials.length > 0 ? (
           classMaterials.map((material) => (
-            <Card key={material.id} className="my-2 mt-transparent shadow-none border-none">
+            <Card
+              key={material.id}
+              className="my-2 mt-transparent shadow-none border-none cursor-pointer"
+              onClick={() =>
+                router.push(
+                  `/classroom/${classroomId}/classwork/detail/${material.type === "assignment" ? "assignment" : "material"}/${material.id}`
+                )
+              }
+            >
               <CardHeader className="flex flex-row items-center space-x-3 p-2">
                 {material.type === "assignment" ? (
                   <NotebookPen
-                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"
-                      }`}
+                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"}`}
                   />
                 ) : (
                   <NotebookText className="w-6 h-6 text-gray-500" />
                 )}
                 <CardTitle className="text-base font-normal flex items-center justify-between w-full">
-                  <a href={material.fileUrl || "#"} className="text-gray-600">
-                    {material.title}
-                  </a>
+                  <span className="text-gray-600">{material.title}</span>
                   {material.dueDate ? (
                     <span className="text-sm text-muted-foreground ml-2">
                       {`Due ${format(new Date(material.dueDate), "d MMM HH:mm")}`}
