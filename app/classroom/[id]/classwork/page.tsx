@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SquareUserRound, Plus, NotebookText, NotebookPen, ChevronDown, ChevronUp } from "lucide-react";
+import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen, ChevronDown, ChevronUp } from "lucide-react";
 import { format, isPast } from "date-fns";
 
 export default function Classwork() {
@@ -84,9 +84,9 @@ export default function Classwork() {
     );
   };
 
-  const handleReviewWork = (materialId: string) => {
+  const handleReviewWork = (materialId: string, materialTitle: string) => {
     // Navigate to the review page for this specific assignment
-    router.push(`/classroom/${classroomId}/classwork/${materialId}/review`);
+    router.push(`/classroom/${classroomId}/classwork/review/${materialId}?title=${encodeURIComponent(materialTitle)}`);
   };
 
   if (loading) {
@@ -107,40 +107,21 @@ export default function Classwork() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-4 py-2 flex items-center">
+            <Button className="bg-purple-600 text-white rounded-full px-4 py-2 flex items-center">
               <Plus className="w-4 h-4 mr-2" /> Create
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {/* <DropdownMenuItem onClick={() => setShowTopicDialog(true)}>Topic</DropdownMenuItem> */}
             <DropdownMenuItem onClick={() => handleNavigation("Assignment")}>Assignment</DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleNavigation("Material")}>Material</DropdownMenuItem>
-            {/* <DropdownMenuItem onClick={() => handleNavigation("Question")}>Question</DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* <Dialog open={showTopicDialog} onOpenChange={setShowTopicDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Topic</DialogTitle>
-            <DialogDescription>Enter a name for the new topic</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-10">
-              <Label htmlFor="topic" className="text-right">Topic</Label>
-              <Input id="topic" value={newTopic} onChange={(e) => setNewTopic(e.target.value)} className="col-span-3" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowTopicDialog(false)} className="bg-purple-600 text-white">Add</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
-
       <div>
         <div className="flex justify-between items-center pb-2 border-b border-gray-300">
           <h2 className="text-lg font-semibold">Class Materials</h2>
+          <MoreVertical className="text-gray-500 cursor-pointer" />
         </div>
 
         {classMaterials.length > 0 ? (
@@ -187,8 +168,11 @@ export default function Classwork() {
                 <CardContent className="pt-0 pb-2 px-0">
                   <div className="flex justify-end pr-2">
                     <Button 
-                      onClick={() => handleReviewWork(material.id)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white font-normal"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReviewWork(material.id, material.title);
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
                       Review Work
                     </Button>
