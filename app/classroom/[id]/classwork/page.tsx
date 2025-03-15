@@ -34,7 +34,8 @@ export default function Classwork() {
 
   const params = useParams();
   const router = useRouter();
-  const classroomId = params?.id as string;
+  const classroomId = params?.id as string;  // Gets classroom ID
+  const { type, itemId } = params;  // Retrieves type and itemId from the URL
 
   useEffect(() => {
     async function fetchClassMaterials() {
@@ -126,11 +127,16 @@ export default function Classwork() {
 
         {classMaterials.length > 0 ? (
           classMaterials.map((material) => (
-            <Card key={material.id} className="my-2 mt-transparent shadow-none border-none hover:bg-gray-50 transition-colors">
-              <CardHeader 
-                className="flex flex-row items-center space-x-3 p-2 cursor-pointer"
-                onClick={() => toggleExpanded(material.id)}
-              >
+            <Card
+              key={material.id}
+              className="my-2 mt-transparent shadow-none border-none cursor-pointer"
+              onClick={() =>
+                router.push(
+                  `/classroom/${classroomId}/classwork/detail/${material.type === "assignment" ? "assignment" : "material"}/${material.id}`
+                )
+              }
+            >
+              <CardHeader className="flex flex-row items-center space-x-3 p-2">
                 {material.type === "assignment" ? (
                   <NotebookPen
                     className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"}`}
