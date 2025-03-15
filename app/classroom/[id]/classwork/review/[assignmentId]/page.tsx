@@ -151,7 +151,7 @@ export default function ReviewWork() {
                                         <div className="flex justify-end">
                                             <div className={`text-xs ${
                                                 student.status === "Graded" ? "text-green-600" : 
-                                                student.status === "Turned in" ? "text-blue-600" : 
+                                                student.status === "Turned in" ? "text-purple-600" : 
                                                 "text-gray-600"
                                             }`}>
                                                 {student.status}
