@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,12 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen } from "lucide-react";
+import { SquareUserRound, Plus, NotebookText, NotebookPen, ChevronDown, ChevronUp } from "lucide-react";
 import { format, isPast } from "date-fns";
 
 export default function Classwork() {
   const [classMaterials, setClassMaterials] = useState<
-    { id: string; title: string; content: string; fileUrl?: string; dueDate?: string; createdAt: string; type: string }[]
+    { id: string; title: string; content: string; fileUrl?: string; dueDate?: string; createdAt: string; type: string; expanded: boolean }[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,12 @@ export default function Classwork() {
         }
 
         const data = await response.json();
-        setClassMaterials(data.assignments);
+        // Add expanded state to each material
+        const materialsWithExpanded = data.assignments.map((material) => ({
+          ...material,
+          expanded: false
+        }));
+        setClassMaterials(materialsWithExpanded);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -69,6 +74,19 @@ export default function Classwork() {
 
   const handleNavigation = (type: string) => {
     router.push(`/classroom/${classroomId}/classwork/create?type=${type}`);
+  };
+
+  const toggleExpanded = (id: string) => {
+    setClassMaterials(prev => 
+      prev.map(material => 
+        material.id === id ? { ...material, expanded: !material.expanded } : material
+      )
+    );
+  };
+
+  const handleReviewWork = (materialId: string) => {
+    // Navigate to the review page for this specific assignment
+    router.push(`/classroom/${classroomId}/classwork/${materialId}/review`);
   };
 
   if (loading) {
@@ -89,7 +107,7 @@ export default function Classwork() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-purple-600 text-white rounded-full px-4 py-2 flex items-center">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-4 py-2 flex items-center">
               <Plus className="w-4 h-4 mr-2" /> Create
             </Button>
           </DropdownMenuTrigger>
@@ -123,36 +141,60 @@ export default function Classwork() {
       <div>
         <div className="flex justify-between items-center pb-2 border-b border-gray-300">
           <h2 className="text-lg font-semibold">Class Materials</h2>
-          <MoreVertical className="text-gray-500 cursor-pointer" />
         </div>
 
         {classMaterials.length > 0 ? (
           classMaterials.map((material) => (
-            <Card key={material.id} className="my-2 mt-transparent shadow-none border-none">
-              <CardHeader className="flex flex-row items-center space-x-3 p-2">
+            <Card key={material.id} className="my-2 mt-transparent shadow-none border-none hover:bg-gray-50 transition-colors">
+              <CardHeader 
+                className="flex flex-row items-center space-x-3 p-2 cursor-pointer"
+                onClick={() => toggleExpanded(material.id)}
+              >
                 {material.type === "assignment" ? (
                   <NotebookPen
-                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"
-                      }`}
+                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"}`}
                   />
                 ) : (
                   <NotebookText className="w-6 h-6 text-gray-500" />
                 )}
                 <CardTitle className="text-base font-normal flex items-center justify-between w-full">
-                  <a href={material.fileUrl || "#"} className="text-gray-600">
+                  <a 
+                    onClick={(e) => e.stopPropagation()} 
+                    href={material.fileUrl || "#"} 
+                    className="text-gray-600"
+                  >
                     {material.title}
                   </a>
-                  {material.dueDate ? (
-                    <span className="text-sm text-muted-foreground ml-2">
-                      {`Due ${format(new Date(material.dueDate), "d MMM HH:mm")}`}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground ml-2">
-                      {`Posted ${format(new Date(material.createdAt), "d MMM HH:mm")}`}
-                    </span>
-                  )}
+                  <div className="flex items-center">
+                    {material.dueDate ? (
+                      <span className="text-sm text-muted-foreground ml-2">
+                        {`Due ${format(new Date(material.dueDate), "d MMM HH:mm")}`}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground ml-2">
+                        {`Posted ${format(new Date(material.createdAt), "d MMM HH:mm")}`}
+                      </span>
+                    )}
+                    {material.expanded ? 
+                      <ChevronUp className="w-4 h-4 ml-2 text-gray-500" /> : 
+                      <ChevronDown className="w-4 h-4 ml-2 text-gray-500" />
+                    }
+                  </div>
                 </CardTitle>
               </CardHeader>
+              
+              {material.expanded && material.type === "assignment" && (
+                <CardContent className="pt-0 pb-2 px-0">
+                  <div className="flex justify-end pr-2">
+                    <Button 
+                      onClick={() => handleReviewWork(material.id)}
+                      className="bg-purple-500 hover:bg-purple-600 text-white font-normal"
+                    >
+                      Review Work
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
             </Card>
           ))
         ) : (
