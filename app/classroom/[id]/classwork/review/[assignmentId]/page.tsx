@@ -2,8 +2,12 @@
 import { useState } from "react";
 import { Files } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ReviewWork() {
+    const { id, assignmentId } = useParams();
+
     const students = [
         { id: '1', name: 'John', fullName: 'John Doe', status: 'Turned in', avatar: 'J', avatarColor: '#F47C24', docId: '1234567890' },
         { id: '2', name: 'Jane', fullName: 'Jane Smith', status: 'Turned in', avatar: 'J', avatarColor: '#4CB5AE', docId: '0987654321' },
@@ -128,39 +132,43 @@ export default function ReviewWork() {
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {filteredStudents.map((student) => (
-                            student.status !== "Not submitted" && (
-                                <div key={student.id} className="bg-white rounded shadow">
-                                    <div className="p-3 border-b border-gray-100 flex items-center">
-                                        <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                                            style={{ backgroundColor: student.avatarColor }}
-                                        >
-                                            {student.avatar}
-                                        </div>
-                                        <div className="ml-2">
-                                            <p className="text-sm font-medium">{student.fullName || student.name}</p>
+                    {filteredStudents.map((student) => (
+                        student.status !== "Not submitted" && (
+                            <Link 
+                                key={student.id} 
+                                href={`/classroom/${id}/classwork/review/${assignmentId}/${student.id}?name=${encodeURIComponent(student.fullName || student.name)}&status=${student.status}&docId=${student.docId}`}
+                                className="bg-white rounded shadow cursor-pointer block"
+                            >
+                                <div className="p-3 border-b border-gray-100 flex items-center">
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                                        style={{ backgroundColor: student.avatarColor }}
+                                    >
+                                        {student.avatar}
+                                    </div>
+                                    <div className="ml-2">
+                                        <p className="text-sm font-medium">{student.fullName || student.name}</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 flex flex-col">
+                                    <div className="h-32 bg-gray-100 mb-2 flex items-center justify-center">
+                                        <div className="w-full h-24 bg-gray-200 flex items-center justify-center">
+                                            <Files className="w-12 h-12 text-gray-400" />
                                         </div>
                                     </div>
-                                    <div className="p-3 flex flex-col">
-                                        <div className="h-32 bg-gray-100 mb-2 flex items-center justify-center">
-                                            <div className="w-full h-24 bg-gray-200 flex items-center justify-center">
-                                                <Files className="w-12 h-12 text-gray-400" />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <div className={`text-xs ${
-                                                student.status === "Graded" ? "text-green-600" : 
-                                                student.status === "Turned in" ? "text-purple-600" : 
-                                                "text-gray-600"
-                                            }`}>
-                                                {student.status}
-                                            </div>
+                                    <div className="flex justify-end">
+                                        <div className={`text-xs ${
+                                            student.status === "Graded" ? "text-green-600" : 
+                                            student.status === "Turned in" ? "text-purple-600" : 
+                                            "text-gray-600"
+                                        }`}>
+                                            {student.status}
                                         </div>
                                     </div>
                                 </div>
-                            )
-                        ))}
+                            </Link>
+                        )
+                    ))}
                     </div>
                 </div>
             </div>
