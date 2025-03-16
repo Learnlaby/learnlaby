@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-import { FaHome, FaCalendar, FaClipboardList, FaBook } from "react-icons/fa";
+import { FaHome, FaCalendar, FaClipboardList } from "react-icons/fa";
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +19,6 @@ import Image from "next/image";
 const items = [
   { title: "Home", url: "/home", icon: FaHome },
   { title: "Calendar", url: "#", icon: FaCalendar },
-  { title: "Registered", url: "#", icon: FaBook },
   { title: "To Do List", url: "/to-do", icon: FaClipboardList },
 ];
 

@@ -125,8 +125,8 @@ export default function Classwork() {
   };
 
   const toggleExpanded = (id: string) => {
-    setClassMaterials(prev => 
-      prev.map(material => 
+    setClassMaterials(prev =>
+      prev.map(material =>
         material.id === id ? { ...material, expanded: !material.expanded } : material
       )
     );
@@ -148,9 +148,10 @@ export default function Classwork() {
   return (
     <div className="p-10">
       <div className="flex items-center justify-between mb-4">
-        <a href="#" className="text-purple-600 flex items-center">
-          <SquareUserRound className="w-6 h-6 mr-2 text-purple-600" />
-          View your work
+        <a href="" className="text-purple-600 flex items-center">
+          {/* <SquareUserRound className="w-6 h-6 mr-2 text-purple-600" />
+          View your work */}
+          WELCOME TO CLASSWORK
         </a>
 
         <DropdownMenu>
