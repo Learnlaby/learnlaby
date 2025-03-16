@@ -63,10 +63,21 @@ export const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, account }) => {
       if (user) {
         token.id = user.id
       }
+
+      // console.log(account!.access_token)
+      if (account?.provider === "google") {
+        await prisma.account.updateMany({
+          where: { userId: token.id!, provider: "google" },
+          data: {
+            access_token: account.access_token,
+          },
+        });
+      }
+
       return token
     },
     session: async ({ session, token }) => {
