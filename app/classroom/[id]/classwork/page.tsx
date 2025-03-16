@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen } from "lucide-react";
+import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen, ChevronDown, ChevronUp } from "lucide-react";
 import { format, isPast } from "date-fns";
 
 export default function Classwork() {
@@ -122,6 +122,19 @@ export default function Classwork() {
     } catch (error) {
       console.error("Error creating section:", error);
     }
+  };
+
+  const toggleExpanded = (id: string) => {
+    setClassMaterials(prev => 
+      prev.map(material => 
+        material.id === id ? { ...material, expanded: !material.expanded } : material
+      )
+    );
+  };
+
+  const handleReviewWork = (materialId: string, materialTitle: string) => {
+    // Navigate to the review page for this specific assignment
+    router.push(`/classroom/${classroomId}/classwork/review/${materialId}?title=${encodeURIComponent(materialTitle)}`);
   };
 
   if (loading) {
