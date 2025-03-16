@@ -61,6 +61,7 @@ export async function POST(req: Request) {
             }
         });
 
+        
         return new Response("User successfully joined the classroom", { status: 201 });
     } catch (error) {
         console.error("Error joining classroom:", error);
