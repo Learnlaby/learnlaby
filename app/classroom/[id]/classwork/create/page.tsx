@@ -19,7 +19,7 @@ export default function CreateClasswork() {
 
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [points, setPoints] = useState(100);
+  const [maxScore, setMaxScore] = useState<number | null>(100);
   const [dueDate, setDueDate] = useState<dayjs.Dayjs | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,6 +81,7 @@ export default function CreateClasswork() {
       }
       if (type === "Assignment" && dueDate) {
         formData.append("dueDate", dueDate.toISOString());
+        formData.append("maxScore", maxScore?.toString() || "100");
       }
 
       files.forEach((file) => formData.append("files", file)); // Attach selected files
@@ -178,11 +179,11 @@ export default function CreateClasswork() {
                   <div className="relative">
                     <select
                       className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600"
-                      value={points}
-                      onChange={(e) => setPoints(Number(e.target.value))}
+                      value={maxScore !== null ? maxScore : "null"}
+                      onChange={(e) => setMaxScore(e.target.value === "null" ? null : Number(e.target.value))}
                     >
                       <option value={100}>100</option>
-                      <option value={0}>Ungraded</option>
+                      <option value="null">Ungraded</option>
                     </select>
                   </div>
                 </div>
