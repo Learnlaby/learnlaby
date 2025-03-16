@@ -24,21 +24,20 @@ import { MoreVertical, SquareUserRound, Plus, NotebookText, NotebookPen, Chevron
 import { format, isPast } from "date-fns";
 
 export default function Classwork() {
-  const [classMaterials, setClassMaterials] = useState<
-    { id: string; title: string; content: string; fileUrl?: string; dueDate?: string; createdAt: string; type: string; expanded: boolean }[]
+  const [sections, setSections] = useState<
+    { id: string; name: string; posts: { id: string; title: string; dueDate?: string; createdAt: string; type: string }[] }[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [showTopicDialog, setShowTopicDialog] = useState<boolean>(false);
-  const [newTopic, setNewTopic] = useState<string>("");
+  const [showSectionDialog, setShowSectionDialog] = useState<boolean>(false);
+  const [newSectionName, setNewSectionName] = useState<string>("");
 
   const params = useParams();
   const router = useRouter();
-  const classroomId = params?.id as string;  // Gets classroom ID
-  const { type, itemId } = params;  // Retrieves type and itemId from the URL
+  const classroomId = params?.id as string;
 
   useEffect(() => {
-    async function fetchClassMaterials() {
+    async function fetchClasswork() {
       if (!classroomId) {
         setError("Classroom ID is missing.");
         setLoading(false);
@@ -46,23 +45,49 @@ export default function Classwork() {
       }
 
       try {
-        const response = await fetch("/api/classroom/posts/classworks", {
+        // Fetch all classwork posts with section details
+        const classworkResponse = await fetch("/api/classroom/posts/classworks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch class materials.");
+        if (!classworkResponse.ok) {
+          throw new Error("Failed to fetch classwork.");
         }
 
-        const data = await response.json();
-        // Add expanded state to each material
-        const materialsWithExpanded = data.assignments.map((material) => ({
-          ...material,
-          expanded: false
-        }));
-        setClassMaterials(materialsWithExpanded);
+        const classworkData = await classworkResponse.json();
+        const allPosts = classworkData.assignments || [];
+
+        // Group posts by section
+        const groupedSections: { [key: string]: { id: string; name: string; posts: any[] } } = {};
+
+        allPosts.forEach((post) => {
+          if (post.section && post.section.name) {
+            const sectionId = post.sectionId;
+            if (!groupedSections[sectionId]) {
+              groupedSections[sectionId] = { id: sectionId, name: post.section.name, posts: [] };
+            }
+            groupedSections[sectionId].posts.push(post);
+          }
+        });
+
+        // Convert grouped sections into an array
+        const formattedSections = Object.values(groupedSections);
+
+        // Identify posts without a section and group them as "All Materials"
+        const unclassifiedPosts = allPosts.filter((post) => !post.sectionId);
+
+        if (unclassifiedPosts.length > 0) {
+          formattedSections.push({
+            id: "all-materials",
+            name: "All Materials",
+            posts: unclassifiedPosts,
+          });
+        }
+
+        // Update state
+        setSections(formattedSections);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -70,11 +95,33 @@ export default function Classwork() {
       }
     }
 
-    fetchClassMaterials();
+    fetchClasswork();
   }, [classroomId]);
 
-  const handleNavigation = (type: string) => {
-    router.push(`/classroom/${classroomId}/classwork/create?type=${type}`);
+  const handleCreateSection = async () => {
+    if (!newSectionName.trim()) {
+      alert("Section name cannot be empty.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/classroom/posts/section/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classroomId, name: newSectionName }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create section.");
+      }
+
+      const newSection = await response.json();
+      setSections([...sections, { id: newSection.id, name: newSection.name, posts: [] }]); // Append new section
+      setShowSectionDialog(false);
+      setNewSectionName("");
+    } catch (error) {
+      console.error("Error creating section:", error);
+    }
   };
 
   const toggleExpanded = (id: string) => {
@@ -113,84 +160,78 @@ export default function Classwork() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handleNavigation("Assignment")}>Assignment</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNavigation("Material")}>Material</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowSectionDialog(true)}>New Section</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/classroom/${classroomId}/classwork/create?type=Assignment`)}>
+              Assignment
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/classroom/${classroomId}/classwork/create?type=Material`)}>
+              Material
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div>
-        <div className="flex justify-between items-center pb-2 border-b border-gray-300">
-          <h2 className="text-lg font-semibold">Class Materials</h2>
-          <MoreVertical className="text-gray-500 cursor-pointer" />
-        </div>
+      {/* Dialog for Creating New Section */}
+      <Dialog open={showSectionDialog} onOpenChange={setShowSectionDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Section</DialogTitle>
+            <DialogDescription>Enter a name for the new section</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Label htmlFor="sectionName" className="text-right">Section Name</Label>
+            <Input id="sectionName" value={newSectionName} onChange={(e) => setNewSectionName(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCreateSection} className="bg-purple-600 text-white">Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {classMaterials.length > 0 ? (
-          classMaterials.map((material) => (
-            <Card
-              key={material.id}
-              className="my-2 mt-transparent shadow-none border-none cursor-pointer"
-              onClick={() =>
-                router.push(
-                  `/classroom/${classroomId}/classwork/detail/${material.type === "assignment" ? "assignment" : "material"}/${material.id}`
-                )
-              }
-            >
-              <CardHeader className="flex flex-row items-center space-x-3 p-2">
-                {material.type === "assignment" ? (
-                  <NotebookPen
-                    className={`w-6 h-6 ${material.dueDate && !isPast(new Date(material.dueDate)) ? "text-purple-600" : "text-gray-500"}`}
-                  />
-                ) : (
-                  <NotebookText className="w-6 h-6 text-gray-500" />
-                )}
-                <CardTitle className="text-base font-normal flex items-center justify-between w-full">
-                  <a 
-                    onClick={(e) => e.stopPropagation()} 
-                    href={material.fileUrl || "#"} 
-                    className="text-gray-600"
-                  >
-                    {material.title}
-                  </a>
-                  <div className="flex items-center">
-                    {material.dueDate ? (
+      {/* Display Sections with Class Materials */}
+      {sections.map((section) => (
+        <div key={section.id} className="mt-6">
+          <div className="flex justify-between items-center pb-2 border-b border-gray-300">
+            <h2 className="text-lg font-semibold">{section.name}</h2>
+            <MoreVertical className="text-gray-500 cursor-pointer" />
+          </div>
+          {section.posts.length > 0 ? (
+            section.posts.map((post) => (
+              <Card
+                key={post.id}
+                className="my-2 shadow-none border-none cursor-pointer"
+                onClick={() =>
+                  router.push(
+                    `/classroom/${classroomId}/classwork/detail/${post.id}`
+                  )
+                }
+              >
+                <CardHeader className="flex flex-row items-center space-x-3 p-2">
+                  {post.type === "assignment" ? (
+                    <NotebookPen className={`w-6 h-6 ${post.dueDate && !isPast(new Date(post.dueDate)) ? "text-purple-600" : "text-gray-500"}`} />
+                  ) : (
+                    <NotebookText className="w-6 h-6 text-gray-500" />
+                  )}
+                  <CardTitle className="text-base font-normal flex items-center justify-between w-full">
+                    {post.title}
+                    {post.dueDate ? (
                       <span className="text-sm text-muted-foreground ml-2">
-                        {`Due ${format(new Date(material.dueDate), "d MMM HH:mm")}`}
+                        {`Due ${format(new Date(post.dueDate), "d MMM HH:mm")}`}
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground ml-2">
-                        {`Posted ${format(new Date(material.createdAt), "d MMM HH:mm")}`}
+                        {`Posted ${format(new Date(post.createdAt), "d MMM HH:mm")}`}
                       </span>
                     )}
-                    {material.expanded ? 
-                      <ChevronUp className="w-4 h-4 ml-2 text-gray-500" /> : 
-                      <ChevronDown className="w-4 h-4 ml-2 text-gray-500" />
-                    }
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              
-              {material.expanded && material.type === "assignment" && (
-                <CardContent className="pt-0 pb-2 px-0">
-                  <div className="flex justify-end pr-2">
-                    <Button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReviewWork(material.id, material.title);
-                      }}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      Review Work
-                    </Button>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))
-        ) : (
-          <p className="text-sm text-muted-foreground mt-4">No class materials posted yet.</p>
-        )}
-      </div>
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground mt-2">No posts in this section.</p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

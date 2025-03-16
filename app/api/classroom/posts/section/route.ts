@@ -8,7 +8,6 @@ export async function POST(request: Request) {
     try {
         // Authenticate the user
         const session = await getServerSession(authOptions);
-
         if (!session || !session.user?.email) {
             return new Response(
                 JSON.stringify({ error: "Unauthorized. Please log in first." }),
@@ -17,8 +16,7 @@ export async function POST(request: Request) {
         }
 
         // Parse request body
-        const bodyText = await request.text();
-        const { classroomId } = JSON.parse(bodyText);
+        const { classroomId } = await request.json();
 
         if (!classroomId) {
             return new Response(
@@ -27,35 +25,24 @@ export async function POST(request: Request) {
             );
         }
 
-        // Check if classroom exists
-        const classroom = await prisma.classroom.findUnique({
-            where: { id: classroomId },
-            select: { id: true, name: true }
-        });
-
-        if (!classroom) {
-            return new Response(
-                JSON.stringify({ error: "Classroom not found." }),
-                { status: 404, headers: { "Content-Type": "application/json" } }
-            );
-        }
-
         // Check if the user is a member of the classroom
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
             select: { id: true }
         });
-
+        
         if (!user) {
             return new Response(
                 JSON.stringify({ error: "User not found." }),
                 { status: 404, headers: { "Content-Type": "application/json" } }
             );
         }
-
+        
+        // Now use the correct userId
         const isMember = await prisma.classroomMember.findFirst({
             where: { userId: user.id, classroomId }
         });
+        
 
         if (!isMember) {
             return new Response(
@@ -64,39 +51,20 @@ export async function POST(request: Request) {
             );
         }
 
-        // Fetch assignments for the classroom
-        const assignments = await prisma.post.findMany({
-            where: { 
-                classroomId, 
-                type: { in: ["assignment", "material"] }
-            },
-            select: {
-                id: true,
-                title: true,
-                content: true,
-                dueDate: true,
-                createdAt: true,
-                type: true,
-                sectionId: true,
-                section: {
-                    select: {
-                        name: true
-                    }
-                }
-            },
-            orderBy: { createdAt: "desc" }
+        // Fetch all sections with their associated posts
+        const sections = await prisma.section.findMany({
+            where: { classroomId }
         });
-        
 
         return new Response(
-            JSON.stringify({ classroom: classroom.name, assignments }),
+            JSON.stringify(sections),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
 
     } catch (error) {
-        console.error("Error fetching classwork assignments:", error);
+        console.error("Error fetching sections:", error);
         return new Response(
-            JSON.stringify({ error: "Failed to fetch classwork assignments." }),
+            JSON.stringify({ error: "Failed to fetch sections." }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }
