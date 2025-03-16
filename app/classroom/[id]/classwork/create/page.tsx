@@ -46,7 +46,6 @@ export default function CreateClasswork() {
 
         const data = await response.json();
         setTopics(data);
-        console.log(data)
       } catch (error) {
         console.error("Error fetching topics:", error);
       }
