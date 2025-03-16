@@ -1,17 +1,14 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
-import { FileText, Bold, Italic, Underline, List, Link, UserPen, ChevronDown } from "lucide-react";
+import { ChevronDown, NotebookText, NotebookPen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-// MUI X Date Picker imports for DateTimePicker
-import * as React from 'react';
+import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
 
 export default function CreateClasswork() {
@@ -19,18 +16,51 @@ export default function CreateClasswork() {
   const searchParams = useSearchParams();
   const classroomId = params?.id as string;
   const type = searchParams?.get("type") || "Assignment";
-  const [dueDate, setDueDate] = useState<dayjs.Dayjs | null>(null);
 
   const [title, setTitle] = useState("");
   const [instructions, setInstructions] = useState("");
   const [points, setPoints] = useState(100);
+  const [dueDate, setDueDate] = useState<dayjs.Dayjs | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [topics, setTopics] = useState<{ id: string; name: string }[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
   const router = useRouter();
 
   useEffect(() => {
     console.log("Classroom ID:", classroomId);
+
+    async function fetchTopics() {
+      if (!classroomId) return;
+      try {
+        const response = await fetch("/api/classroom/posts/section", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ classroomId }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch topics.");
+        }
+
+        const data = await response.json();
+        setTopics(data);
+        console.log(data)
+      } catch (error) {
+        console.error("Error fetching topics:", error);
+      }
+    }
+
+    fetchTopics();
   }, [classroomId]);
+
+  // Handle file selection
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFiles(Array.from(event.target.files)); // Store selected files
+    }
+  };
 
   const handleCreateClick = async () => {
     if (!classroomId || !title) {
@@ -41,31 +71,34 @@ export default function CreateClasswork() {
     setLoading(true);
 
     try {
-      // Determine the API endpoint based on type
-      let apiEndpoint = "/api/classroom/posts/assignment/create";
-      const requestBody: { classroomId: string; title: string; content: string; dueDate?: string | null } = {
-        classroomId,
-        title,
-        content: instructions,
-      };
+      // Create FormData for submission
+      const formData = new FormData();
+      formData.append("classroomId", classroomId);
+      formData.append("title", title);
+      formData.append("content", instructions);
+      if (selectedTopic) {
+        formData.append("topicId", selectedTopic);
+      }
+      if (type === "Assignment" && dueDate) {
+        formData.append("dueDate", dueDate.toISOString());
+      }
 
-      if (type === "Assignment") {
-        requestBody.dueDate = dueDate ? dueDate.toISOString() : null;
-      } else if (type === "Material") {
+      files.forEach((file) => formData.append("files", file)); // Attach selected files
+
+      let apiEndpoint = "/api/classroom/posts/assignment/create";
+      if (type === "Material") {
         apiEndpoint = "/api/classroom/posts/material/create";
       }
 
       const response = await fetch(apiEndpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: formData, // Send as FormData
       });
 
       if (!response.ok) {
         throw new Error(`Failed to create ${type.toLowerCase()}.`);
       }
 
-      // Redirect to classwork page
       router.push(`/classroom/${classroomId}/classwork`);
     } catch (error) {
       console.error(`Error creating ${type.toLowerCase()}:`, error);
@@ -79,7 +112,17 @@ export default function CreateClasswork() {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <div className="w-full bg-white shadow-sm p-4 flex items-center border-b">
         <div className="flex items-center text-black-600 space-x-4">
-          <FileText className="text-purple-600 ml-3" />
+          <Button
+            className="text-purple-600 bg-transparent hover:bg-gray-200 px-2 py-1 rounded-md"
+            onClick={() => router.push(`/classroom/${classroomId}/classwork`)}
+          >
+            ← Back
+          </Button>
+          {type === "Assignment" ? (
+            <NotebookPen className="text-purple-600 ml-3" />
+          ) : (
+            <NotebookText className="text-purple-600 ml-3" />
+          )}
           <h2 className="text-lg">{type}</h2>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -108,91 +151,80 @@ export default function CreateClasswork() {
               onChange={(e) => setInstructions(e.target.value)}
             />
 
-            {/* <div className="flex space-x-4 border-t pt-4">
-              <button>
-                <Bold className="text-black w-5 h-5 rounded hover:bg-gray-200" />
-              </button>
-              <button>
-                <Italic className="text-black w-5 h-5 rounded hover:bg-gray-200" />
-              </button>
-              <button>
-                <Underline className="text-black w-5 h-5 rounded hover:bg-gray-200" />
-              </button>
-              <button>
-                <List className="text-black w-5 h-5 rounded hover:bg-gray-200" />
-              </button>
-              <button>
-                <Link className="text-black w-5 h-5 rounded hover:bg-gray-200" />
-              </button>
-            </div> */}
+            {/* File Upload Input */}
+            <div className="mb-4">
+              <label className="text-sm font-semibold text-gray-700">Attach Files</label>
+              <input
+                type="file"
+                multiple
+                className="w-full border border-gray-300 p-2 rounded-lg mt-2"
+                onChange={handleFileChange}
+              />
+              {files.length > 0 && (
+                <p className="text-sm text-gray-500 mt-1">{files.length} file(s) selected</p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Settings (only for assignments) */}
-
-        {type === "Assignment" && (
-          <div className="w-full md:w-80 p-4 border-t md:border-t-0 md:border-l bg-white">
-            <div className="space-y-6">
-              {/* <div>
-              <p className="text-sm text-black-500 mb-2">Assign to</p>
-              <div className="relative">
-                <div className="w-full p-2 border rounded-md flex items-center justify-between">
-                  <div className="flex items-center text-black-500">
-                    <UserPen className="w-5 h-5 text-purple-600 mr-3 ml-1" /> Select students
+        <div className="w-full md:w-80 p-4 border-t md:border-t-0 md:border-l bg-white">
+          <div className="space-y-6">
+            {/* Assignment Settings */}
+            {type === "Assignment" && (
+              <>
+                <div>
+                  <p className="text-sm text-black-500 mb-2">Points</p>
+                  <div className="relative">
+                    <select
+                      className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600"
+                      value={points}
+                      onChange={(e) => setPoints(Number(e.target.value))}
+                    >
+                      <option value={100}>100</option>
+                      <option value={0}>Ungraded</option>
+                    </select>
                   </div>
                 </div>
-              </div>
-            </div> */}
 
-              {/* <div>
-              <p className="text-sm text-black-500 mb-2">Points</p>
-              <div className="relative">
-                <select 
-                  className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600"
-                  value={points}
-                  onChange={(e) => setPoints(Number(e.target.value))}
-                >
-                  <option value={100}>100</option>
-                  <option value={50}>50</option>
-                  <option value={25}>25</option>
-                  <option value={10}>10</option>
-                  <option value={0}>Ungraded</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
-                </div>
-              </div>
-            </div> */}
-
-              <div>
-                <p className="text-sm text-black-500 mb-2">Due</p>
-                <div className="relative">
-                  {/* MUI DateTimePicker integration */}
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={["DateTimePicker"]}>
+                <div>
+                  <p className="text-sm text-black-500 mb-2">Due Date</p>
+                  <div className="relative">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DateTimePicker
                         value={dueDate}
                         onChange={(newValue) => setDueDate(newValue)}
+                        className="w-full"
                       />
-                    </DemoContainer>
-                  </LocalizationProvider>
+                    </LocalizationProvider>
+                  </div>
                 </div>
-              </div>
-              {/* <div>
+              </>
+            )}
+
+            {/* Topic Selection (for all types) */}
+            <div>
               <p className="text-sm text-black-500 mb-2">Topic</p>
               <div className="relative mb-10">
-                <select className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600">
-                  <option>No topic</option>
+                <select
+                  className="w-full p-2 text-sm border rounded-md appearance-none bg-white text-gray-600"
+                  value={selectedTopic || ""}
+                  onChange={(e) => setSelectedTopic(e.target.value)}
+                >
+                  <option value="">No topic</option>
+                  {topics.map((topic) => (
+                    <option key={topic.id} value={topic.id}>
+                      {topic.name}
+                    </option>
+                  ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <ChevronDown className="h-4 w-4 text-gray-400" />
                 </div>
               </div>
-            </div> */}
             </div>
           </div>
-        )}
-
+        </div>
       </div>
     </div>
   );
