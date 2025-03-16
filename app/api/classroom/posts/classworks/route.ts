@@ -74,10 +74,15 @@ export async function POST(request: Request) {
                 id: true,
                 title: true,
                 content: true,
-                fileUrl: true,
                 dueDate: true,
                 createdAt: true,
-                type: true
+                type: true,
+                sectionId: true,
+                section: {
+                    select: {
+                        name: true
+                    }
+                }
             },
             orderBy: { createdAt: "desc" }
         });
