@@ -31,6 +31,7 @@ export default function Classwork() {
   const [error, setError] = useState<string | null>(null);
   const [showSectionDialog, setShowSectionDialog] = useState<boolean>(false);
   const [newSectionName, setNewSectionName] = useState<string>("");
+  const [expandedAssignments, setExpandedAssignments] = useState<string[]>([]);
 
   const params = useParams();
   const router = useRouter();
@@ -124,17 +125,10 @@ export default function Classwork() {
     }
   };
 
-  const toggleExpanded = (id: string) => {
-    setClassMaterials(prev =>
-      prev.map(material =>
-        material.id === id ? { ...material, expanded: !material.expanded } : material
-      )
+  const toggleExpand = (postId: string) => {
+    setExpandedAssignments((prev) =>
+      prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId]
     );
-  };
-
-  const handleReviewWork = (materialId: string, materialTitle: string) => {
-    // Navigate to the review page for this specific assignment
-    router.push(`/classroom/${classroomId}/classwork/review/${materialId}?title=${encodeURIComponent(materialTitle)}`);
   };
 
   if (loading) {
@@ -198,35 +192,55 @@ export default function Classwork() {
           </div>
           {section.posts.length > 0 ? (
             section.posts.map((post) => (
-              <Card
-                key={post.id}
-                className="my-2 shadow-none border-none cursor-pointer"
-                onClick={() =>
-                  router.push(
-                    `/classroom/${classroomId}/classwork/detail/${post.id}`
-                  )
-                }
-              >
-                <CardHeader className="flex flex-row items-center space-x-3 p-2">
-                  {post.type === "assignment" ? (
-                    <NotebookPen className={`w-6 h-6 ${post.dueDate && !isPast(new Date(post.dueDate)) ? "text-purple-600" : "text-gray-500"}`} />
-                  ) : (
-                    <NotebookText className="w-6 h-6 text-gray-500" />
-                  )}
-                  <CardTitle className="text-base font-normal flex items-center justify-between w-full">
-                    {post.title}
-                    {post.dueDate ? (
-                      <span className="text-sm text-muted-foreground ml-2">
-                        {`Due ${format(new Date(post.dueDate), "d MMM HH:mm")}`}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-muted-foreground ml-2">
-                        {`Posted ${format(new Date(post.createdAt), "d MMM HH:mm")}`}
-                      </span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
+<Card key={post.id} className="my-2 shadow-none border-none cursor-pointer">
+  <CardHeader className="flex flex-row items-center p-2">
+    {post.type === "assignment" ? (
+      <NotebookPen className={`w-6 h-6 mr-3 ${post.dueDate && !isPast(new Date(post.dueDate)) ? "text-purple-600" : "text-gray-500"}`} />
+    ) : (
+      <NotebookText className="w-6 h-6 mr-3 text-gray-500" />
+    )}
+    
+    <CardTitle className="text-base font-normal flex-1">
+      <button 
+        onClick={() => router.push(`/classroom/${classroomId}/classwork/detail/${post.id}`)}
+      >
+        {post.title}
+      </button>
+    </CardTitle>
+    
+    <div className="flex items-center">
+      <span className="text-sm text-muted-foreground mr-4 w-36 text-right">
+        {post.dueDate ? (
+          `Due ${format(new Date(post.dueDate), "d MMM HH:mm")}`
+        ) : (
+          `Posted ${format(new Date(post.createdAt), "d MMM HH:mm")}`
+        )}
+      </span>
+      
+      {post.type === "assignment" ? (
+        <button onClick={() => toggleExpand(post.id)}>
+          {expandedAssignments.includes(post.id) ? 
+            <ChevronUp /> : 
+            <ChevronDown className="text-gray-500" />
+          }
+        </button>
+      ) : (
+        <div className="w-6"></div> // Empty space placeholder with same width as chevron button
+      )}
+    </div>
+  </CardHeader>
+  
+  {expandedAssignments.includes(post.id) && post.type === "assignment" && (
+    <CardContent className="p-4 flex justify-end">
+      <Button 
+        className="bg-purple-600 text-white mr-7" 
+        onClick={() => router.push(`/classroom/${classroomId}/classwork/review/${post.id}`)}
+      >
+        Review Work
+      </Button>
+    </CardContent>
+  )}
+</Card>
             ))
           ) : (
             <p className="text-sm text-muted-foreground mt-2">No posts in this section.</p>
