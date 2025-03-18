@@ -1,12 +1,22 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const prisma = new PrismaClient();
 
+// AWS S3 Client Configuration
+const s3Client = new S3Client({
+    region: process.env.NEXT_AWS_S3_REGION,
+    credentials: {
+        accessKeyId: process.env.NEXT_AWS_S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.NEXT_AWS_S3_SECRET_ACCESS_KEY!,
+    },
+});
+
 export async function POST(request: Request) {
     try {
-        // Authenticate the user
         const session = await getServerSession(authOptions);
 
         if (!session || !session.user?.email) {
@@ -16,7 +26,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Find the logged-in user's ID
         const user = await prisma.user.findUnique({
             where: { email: session.user.email },
             select: { id: true }
@@ -29,11 +38,15 @@ export async function POST(request: Request) {
             );
         }
 
-        // Parse request body
-        const bodyText = await request.text();
-        const { classroomId, title, content, dueDate, points } = JSON.parse(bodyText);
+        const formData = await request.formData();
+        const classroomId = formData.get("classroomId") as string;
+        const title = formData.get("title") as string;
+        const content = formData.get("content") as string;
+        const dueDate = formData.get("dueDate") ? new Date(formData.get("dueDate") as string) : null;
+        const maxScore = formData.get("maxScore") ? parseInt(formData.get("maxScore") as string, 10) : null;
+        const fileList = formData.getAll("files") as File[];
+        const sectionId = formData.get("topicId") as string; // Section ID
 
-        // Validate required fields
         if (!classroomId || !title) {
             return new Response(
                 JSON.stringify({ error: "Classroom ID and title are required." }),
@@ -41,7 +54,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Check if the user is a member of the classroom
         const isMember = await prisma.classroomMember.findFirst({
             where: { userId: user.id, classroomId }
         });
@@ -53,7 +65,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Create the assignment
+        // **Create Assignment Post**
         const assignment = await prisma.post.create({
             data: {
                 classroomId,
@@ -61,14 +73,54 @@ export async function POST(request: Request) {
                 type: "assignment",
                 title,
                 content,
-                dueDate: dueDate ? new Date(dueDate) : null, // Convert dueDate to a Date object
-                fileUrl: null,
-                isTeamAssignment: false
+                dueDate,
+                sectionId,
+                isTeamAssignment: false,
+                maxScore,
             }
         });
 
+        const uploadedFiles = [];
+
+        for (const file of fileList) {
+            const fileKey = `${Date.now()}-${file.name}`;
+            const uploadParams = {
+                Bucket: process.env.NEXT_AWS_S3_BUCKET_NAME!,
+                Key: fileKey,
+                ContentType: file.type,
+            };
+
+            const command = new PutObjectCommand(uploadParams);
+            const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+
+            // Upload file to S3
+            const response = await fetch(signedUrl, {
+                method: "PUT",
+                body: await file.arrayBuffer(),
+                headers: {
+                    "Content-Type": file.type
+                }
+            });
+
+            if (!response.ok) {
+                console.error(`Failed to upload file: ${file.name}`);
+                continue;
+            }
+
+            const fileUrl = `https://${process.env.NEXT_AWS_S3_BUCKET_NAME}.s3.${process.env.NEXT_AWS_S3_REGION}.amazonaws.com/${fileKey}`;
+
+            const savedFile = await prisma.file.create({
+                data: {
+                    url: fileUrl,
+                    postId: assignment.id,
+                },
+            });
+
+            uploadedFiles.push(savedFile);
+        }
+
         return new Response(
-            JSON.stringify(assignment),
+            JSON.stringify({ assignment, files: uploadedFiles }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
 
