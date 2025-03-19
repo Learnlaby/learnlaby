@@ -18,7 +18,7 @@ import Image from "next/image";
 // Menu items: Home, Calendar, Registered, To-Do List
 const items = [
   { title: "Home", url: "/home", icon: FaHome },
-  { title: "Calendar", url: "#", icon: FaCalendar },
+  { title: "Calendar", url: "/calendar", icon: FaCalendar },
   { title: "To Do List", url: "/to-do", icon: FaClipboardList },
 ];
 
