@@ -26,7 +26,6 @@ model User {
   posts            Post[]
   comments         Comment[]
   submissions      Submission[]
-  teamMemberships  TeamMember[]
   studentProgress  StudentProgress[]
   grades           Grade[]
 }
@@ -97,7 +96,6 @@ model Post {
   title            String?   @db.VarChar(255)
   content          String?
   dueDate          DateTime?
-  isTeamAssignment Boolean   @default(false)
   maxScore         Int?
   createdAt        DateTime  @default(now())
 
@@ -105,58 +103,30 @@ model Post {
   author      User       @relation(fields: [userId], references: [id])
   section     Section?   @relation(fields: [sectionId], references: [id])
   comments    Comment[]
-  teams       Team[]
   submissions Submission[]
   files       File[]
-}
-
-
-model Team {
-  id           String      @id @default(cuid())
-  assignmentId String
-  name         String?  @db.VarChar(255)
-  createdAt    DateTime @default(now())
-
-  assignment  Post         @relation(fields: [assignmentId], references: [id])
-  members     TeamMember[]
-  submissions Submission[]
-  grades      Grade[]
-}
-
-model TeamMember {
-  id        String      @id @default(cuid())
-  teamId    String
-  studentId String
-  joinedAt  DateTime @default(now())
-
-  team    Team @relation(fields: [teamId], references: [id])
-  student User @relation(fields: [studentId], references: [id])
 }
 
 model Submission {
   id          String      @id @default(cuid())
   postId      String
-  studentId   String? // Nullable for team submissions
-  teamId      String? // Nullable for individual submissions
+  studentId   String?
   submittedAt DateTime @default(now())
 
   post       Post    @relation(fields: [postId], references: [id])
   student    User?   @relation(fields: [studentId], references: [id])
-  team       Team?   @relation(fields: [teamId], references: [id])
   files      File[]
 }
 
 model Grade {
   id           String      @id @default(cuid())
   submissionId String
-  studentId    String? // Nullable if team submission
-  teamId       String? // Nullable if individual submission
+  studentId    String?
   score        Decimal  @db.Decimal(5, 2)
   feedback     String?
   gradedAt     DateTime @default(now())
 
   student    User?      @relation(fields: [studentId], references: [id])
-  team       Team?      @relation(fields: [teamId], references: [id])
 }
 
 model Comment {
