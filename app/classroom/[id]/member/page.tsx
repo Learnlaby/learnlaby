@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { QrCode, Mail, Copy, Send, UserPlus, X } from "lucide-react"
+import { UserPlus, X, Plus, Send, Trash2 } from "lucide-react"
+
+type InvitePerson = {
+  email: string
+  role: "student" | "co-teacher"
+  id: string
+}
 
 export default function PeoplePage() {
   const [members, setMembers] = useState<
@@ -15,9 +21,7 @@ export default function PeoplePage() {
   >([])
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"link" | "email">("link")
-  const [email, setEmail] = useState("")
-  const [emails, setEmails] = useState<string[]>([])
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isInviting, setIsInviting] = useState(false)
   const [notification, setNotification] = useState<{
     title: string
@@ -25,14 +29,12 @@ export default function PeoplePage() {
     type: "success" | "error"
     visible: boolean
   } | null>(null)
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
+
+  // State for people to invite
+  const [invitePeople, setInvitePeople] = useState<InvitePerson[]>([{ email: "", role: "student", id: "1" }])
 
   const params = useParams()
   const classroomId = params?.id as string
-
-  // Mock classroom code - in a real app, this would come from your backend
-  const classroomCode = "CLASS-" + classroomId + "-" + Math.random().toString(36).substring(2, 7).toUpperCase()
-  const inviteLink = `${window.location.origin}/join?code=${classroomCode}`
 
   useEffect(() => {
     async function fetchMembers() {
@@ -65,54 +67,75 @@ export default function PeoplePage() {
     fetchMembers()
   }, [classroomId])
 
-  const handleAddEmail = () => {
-    if (email && !emails.includes(email) && email.includes("@")) {
-      setEmails([...emails, email])
-      setEmail("")
-    } else if (!email.includes("@")) {
-      setNotification({
-        title: "Invalid email",
-        message: "Please enter a valid email address",
-        type: "error",
-        visible: true,
-      })
-    } else if (emails.includes(email)) {
-      setNotification({
-        title: "Email already added",
-        message: "This email is already in the list",
-        type: "error",
-        visible: true,
-      })
+  const handleEmailChange = (id: string, email: string) => {
+    setInvitePeople(invitePeople.map((person) => (person.id === id ? { ...person, email } : person)))
+  }
+
+  const handleRoleChange = (id: string, role: "student" | "co-teacher") => {
+    setInvitePeople(invitePeople.map((person) => (person.id === id ? { ...person, role } : person)))
+  }
+
+  const addPersonField = () => {
+    setInvitePeople([...invitePeople, { email: "", role: "student", id: Date.now().toString() }])
+  }
+
+  const removePersonField = (id: string) => {
+    if (invitePeople.length > 1) {
+      setInvitePeople(invitePeople.filter((person) => person.id !== id))
     }
   }
 
-  const handleRemoveEmail = (emailToRemove: string) => {
-    setEmails(emails.filter((e) => e !== emailToRemove))
+  const validateEmails = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const invalidEmails = invitePeople.filter((person) => person.email.trim() !== "" && !emailRegex.test(person.email))
+
+    if (invalidEmails.length > 0) {
+      setNotification({
+        title: "Invalid email(s)",
+        message: "Please enter valid email addresses",
+        type: "error",
+        visible: true,
+      })
+      return false
+    }
+
+    // Check for empty emails
+    const emptyEmails = invitePeople.filter((person) => person.email.trim() === "")
+    if (emptyEmails.length === invitePeople.length) {
+      setNotification({
+        title: "No emails entered",
+        message: "Please enter at least one email address",
+        type: "error",
+        visible: true,
+      })
+      return false
+    }
+
+    return true
   }
 
   const handleSendInvites = async () => {
+    if (!validateEmails()) return
+
     setIsInviting(true)
+
+    // Filter out empty emails
+    const peopleToInvite = invitePeople.filter((person) => person.email.trim() !== "")
+
     // Mock API call - in a real app, this would send the invites
     await new Promise((resolve) => setTimeout(resolve, 1000))
+
     setNotification({
       title: "Invites sent!",
-      message: `Sent invitations to ${emails.length} student${emails.length !== 1 ? "s" : ""}`,
+      message: `Sent invitations to ${peopleToInvite.length} people`,
       type: "success",
       visible: true,
     })
-    setEmails([])
+
+    // Reset form
+    setInvitePeople([{ email: "", role: "student", id: "1" }])
     setIsInviting(false)
     setIsInviteDialogOpen(false)
-  }
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setNotification({
-      title: "Copied to clipboard",
-      message: "The invite link has been copied to your clipboard",
-      type: "success",
-      visible: true,
-    })
   }
 
   if (loading) {
@@ -185,7 +208,7 @@ export default function PeoplePage() {
                   onClick={() => setIsInviteDialogOpen(true)}
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span>Invite Students</span>
+                  <span>Add People</span>
                 </Button>
               </div>
             </div>
@@ -208,145 +231,71 @@ export default function PeoplePage() {
         </div>
       </div>
 
-      {/* Invite Dialog */}
+      {/* Add People Dialog */}
       <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Invite Students</DialogTitle>
-            <DialogDescription>Invite students to join your classroom using a code, link, or email.</DialogDescription>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Add People</DialogTitle>
+              <Button variant="outline" size="icon" onClick={addPersonField} className="rounded-lg">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            <DialogDescription>Invite people to join your classroom by email</DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4">
-            <div className="flex border-b mb-6">
-              <button
-                onClick={() => setActiveTab("link")}
-                className={`flex items-center gap-2 px-4 py-2 ${
-                  activeTab === "link"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-muted-foreground"
-                }`}
-              >
-                <QrCode className="h-4 w-4" />
-                <span>Code & Link</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("email")}
-                className={`flex items-center gap-2 px-4 py-2 ${
-                  activeTab === "email"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-muted-foreground"
-                }`}
-              >
-                <Mail className="h-4 w-4" />
-                <span>Email</span>
-              </button>
-            </div>
-
-            {activeTab === "link" && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Classroom Code</label>
-                  <div className="flex">
-                    <Input value={classroomCode} readOnly className="font-mono text-lg" />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="ml-2"
-                      onClick={() => copyToClipboard(classroomCode)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Invite Link</label>
-                  <div className="flex">
-                    <Input value={inviteLink} readOnly />
-                    <Button variant="outline" size="icon" className="ml-2" onClick={() => copyToClipboard(inviteLink)}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg mt-4">
-                  <h3 className="font-medium mb-2">How students join:</h3>
-                  <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                    <li>Students go to the join page or scan the QR code</li>
-                    <li>They enter the classroom code</li>
-                    <li>You'll receive a notification to approve their request</li>
-                    <li>Once approved, they'll be added to your classroom</li>
-                  </ol>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "email" && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Student Email</label>
-                  <div className="flex">
+          {/* Scrollable container for people entries */}
+          <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
+            <div className="space-y-4">
+              {invitePeople.map((person, index) => (
+                <div key={person.id} className="flex gap-2 items-center p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-1.5 block">Email</label>
                     <Input
                       type="email"
-                      placeholder="student@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      value={person.email}
+                      onChange={(e) => handleEmailChange(person.id, e.target.value)}
                     />
-                    <Button variant="outline" className="ml-2" onClick={handleAddEmail}>
-                      Add
+                  </div>
+                  <div className="w-32">
+                    <label className="text-sm font-medium mb-1.5 block">Role</label>
+                    <select
+                      className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                      value={person.role}
+                      onChange={(e) => handleRoleChange(person.id, e.target.value as "student" | "co-teacher")}
+                    >
+                      <option value="student">Student</option>
+                      <option value="co-teacher">Co-Teacher</option>
+                    </select>
+                  </div>
+                  {invitePeople.length > 1 && (
+                    <Button variant="ghost" size="icon" className="mt-6" onClick={() => removePersonField(person.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
-                  </div>
-                </div>
-
-                {emails.length > 0 && (
-                  <div className="border rounded-md p-4">
-                    <label className="text-sm font-medium mb-2 block">Recipients</label>
-                    <div className="flex flex-wrap gap-2">
-                      {emails.map((email, index) => (
-                        <div key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center">
-                          <span>{email}</span>
-                          <button
-                            className="ml-2 text-gray-500 hover:text-gray-700"
-                            onClick={() => handleRemoveEmail(email)}
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <Button
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                  disabled={emails.length === 0 || isInviting}
-                  onClick={handleSendInvites}
-                >
-                  {isInviting ? (
-                    <span className="flex items-center gap-2">
-                      <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                      Sending...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Send className="h-4 w-4" />
-                      Send Invitations ({emails.length})
-                    </span>
                   )}
-                </Button>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-medium mb-2">What happens next:</h3>
-                  <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                    <li>Students receive an email with a link to join your classroom</li>
-                    <li>When they click the link, they'll be prompted to create an account or sign in</li>
-                    <li>You'll receive a notification to approve their request</li>
-                    <li>Once approved, they'll be added to your classroom</li>
-                  </ol>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
+
+          <Button
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
+            disabled={isInviting}
+            onClick={handleSendInvites}
+          >
+            {isInviting ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                Sending...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Send className="h-4 w-4" />
+                Send Invitations
+              </span>
+            )}
+          </Button>
         </DialogContent>
       </Dialog>
     </>
