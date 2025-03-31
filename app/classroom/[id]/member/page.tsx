@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { UserPlus, X, Plus, Send, Trash2 } from "lucide-react"
+import { UserPlus, X, Plus, Send, Trash2, Copy, QrCode, Mail } from "lucide-react"
 
 type InvitePerson = {
   email: string
@@ -23,6 +23,7 @@ export default function PeoplePage() {
   const [error, setError] = useState<string | null>(null)
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isInviting, setIsInviting] = useState(false)
+  const [activeTab, setActiveTab] = useState<"code" | "email">("code")
   const [notification, setNotification] = useState<{
     title: string
     message: string
@@ -36,6 +37,9 @@ export default function PeoplePage() {
   const params = useParams()
   const classroomId = params?.id as string
 
+  // Mock classroom code - in a real app, this would come from your backend
+  const [classroomCode, setClassCode] = useState<String>("")
+  
   useEffect(() => {
     async function fetchMembers() {
       if (!classroomId) {
@@ -64,6 +68,32 @@ export default function PeoplePage() {
       }
     }
 
+    async function fetchClassroomCode() {
+      if (!classroomId) {
+        setError("Classroom ID is missing.")
+        setLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch("/api/classroom/"+classroomId, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch classroom")
+        }
+
+        const data = await response.json()
+        setClassCode(data.code)
+      } catch (err) {
+        setError((err as Error).message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchClassroomCode()
     fetchMembers()
   }, [classroomId])
 
@@ -76,7 +106,21 @@ export default function PeoplePage() {
   }
 
   const addPersonField = () => {
-    setInvitePeople([...invitePeople, { email: "", role: "student", id: Date.now().toString() }])
+    const newId = Date.now().toString()
+    setInvitePeople([...invitePeople, { email: "", role: "student", id: newId }])
+
+    // Show notification
+    setNotification({
+      title: "New field added",
+      message: "Added a new email field",
+      type: "success",
+      visible: true,
+    })
+
+    // Auto-hide notification after 2 seconds
+    setTimeout(() => {
+      setNotification(null)
+    }, 2000)
   }
 
   const removePersonField = (id: string) => {
@@ -115,27 +159,47 @@ export default function PeoplePage() {
   }
 
   const handleSendInvites = async () => {
-    if (!validateEmails()) return
+    if (activeTab === "email" && !validateEmails()) return
 
     setIsInviting(true)
-
-    // Filter out empty emails
-    const peopleToInvite = invitePeople.filter((person) => person.email.trim() !== "")
 
     // Mock API call - in a real app, this would send the invites
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    if (activeTab === "code") {
+      setNotification({
+        title: "Classroom code created!",
+        message: "Students can now join using this code",
+        type: "success",
+        visible: true,
+      })
+    } else {
+      // Filter out empty emails
+      const peopleToInvite = invitePeople.filter((person) => person.email.trim() !== "")
+
+      setNotification({
+        title: "Invites sent!",
+        message: `Sent invitations to ${peopleToInvite.length} people`,
+        type: "success",
+        visible: true,
+      })
+
+      // Reset form
+      setInvitePeople([{ email: "", role: "student", id: "1" }])
+    }
+
+    setIsInviting(false)
+    setIsInviteDialogOpen(false)
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
     setNotification({
-      title: "Invites sent!",
-      message: `Sent invitations to ${peopleToInvite.length} people`,
+      title: "Copied to clipboard",
+      message: "The classroom code has been copied to your clipboard",
       type: "success",
       visible: true,
     })
-
-    // Reset form
-    setInvitePeople([{ email: "", role: "student", id: "1" }])
-    setIsInviting(false)
-    setIsInviteDialogOpen(false)
   }
 
   if (loading) {
@@ -237,49 +301,113 @@ export default function PeoplePage() {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>Add People</DialogTitle>
-              <Button variant="outline" size="icon" onClick={addPersonField} className="rounded-lg">
-                <Plus className="h-4 w-4" />
-              </Button>
+              {activeTab === "email" && (
+                <Button variant="outline" size="icon" onClick={addPersonField} className="rounded-lg">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            <DialogDescription>Invite people to join your classroom by email</DialogDescription>
+            <DialogDescription>Invite people to join your classroom</DialogDescription>
           </DialogHeader>
 
-          {/* Scrollable container for people entries */}
-          <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
-            <div className="space-y-4">
-              {invitePeople.map((person, index) => (
-                <div key={person.id} className="flex gap-2 items-center p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <label className="text-sm font-medium mb-1.5 block">Email</label>
-                    <Input
-                      type="email"
-                      placeholder="email@example.com"
-                      value={person.email}
-                      onChange={(e) => handleEmailChange(person.id, e.target.value)}
-                    />
-                  </div>
-                  <div className="w-32">
-                    <label className="text-sm font-medium mb-1.5 block">Role</label>
-                    <select
-                      className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-                      value={person.role}
-                      onChange={(e) => handleRoleChange(person.id, e.target.value as "student" | "co-teacher")}
-                    >
-                      <option value="student">Student</option>
-                      <option value="co-teacher">Co-Teacher</option>
-                    </select>
-                  </div>
-                  {invitePeople.length > 1 && (
-                    <Button variant="ghost" size="icon" className="mt-6" onClick={() => removePersonField(person.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+          <div className="mt-4">
+            <div className="flex border-b mb-6">
+              <button
+                onClick={() => setActiveTab("code")}
+                className={`flex items-center gap-2 px-4 py-2 ${
+                  activeTab === "code"
+                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <QrCode className="h-4 w-4" />
+                <span>Classroom Code</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("email")}
+                className={`flex items-center gap-2 px-4 py-2 ${
+                  activeTab === "email"
+                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Mail className="h-4 w-4" />
+                <span>Email</span>
+              </button>
             </div>
+
+            {activeTab === "code" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Classroom Code</label>
+                  <div className="flex">
+                    <Input value={classroomCode} readOnly className="font-mono text-lg" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="ml-2"
+                      onClick={() => copyToClipboard(classroomCode)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg mt-4">
+                  <h3 className="font-medium mb-2">How students join:</h3>
+                  <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                    <li>Students go to the join page</li>
+                    <li>They enter the classroom code</li>
+                    <li>You'll receive a notification to approve their request</li>
+                    <li>Once approved, they'll be added to your classroom</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "email" && (
+              <div className="max-h-[60vh] overflow-y-auto pr-2">
+                <div className="space-y-4">
+                  {invitePeople.map((person, index) => (
+                    <div key={person.id} className="flex gap-2 items-center p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <label className="text-sm font-medium mb-1.5 block">Email</label>
+                        <Input
+                          type="email"
+                          placeholder="email@example.com"
+                          value={person.email}
+                          onChange={(e) => handleEmailChange(person.id, e.target.value)}
+                        />
+                      </div>
+                      <div className="w-32">
+                        <label className="text-sm font-medium mb-1.5 block">Role</label>
+                        <select
+                          className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                          value={person.role}
+                          onChange={(e) => handleRoleChange(person.id, e.target.value as "student" | "co-teacher")}
+                        >
+                          <option value="student">Student</option>
+                          <option value="co-teacher">Co-Teacher</option>
+                        </select>
+                      </div>
+                      {invitePeople.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="mt-6"
+                          onClick={() => removePersonField(person.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <Button
+          {/* <Button
             className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
             disabled={isInviting}
             onClick={handleSendInvites}
@@ -287,18 +415,17 @@ export default function PeoplePage() {
             {isInviting ? (
               <span className="flex items-center gap-2">
                 <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                Sending...
+                {activeTab === "code" ? "Creating..." : "Sending..."}
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <Send className="h-4 w-4" />
-                Send Invitations
+                {activeTab === "code" ? "Create Code" : "Send Invitations"}
               </span>
             )}
-          </Button>
+          </Button> */}
         </DialogContent>
       </Dialog>
     </>
   )
 }
-
