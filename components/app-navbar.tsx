@@ -122,9 +122,6 @@ const AppNavbar = () => {
             return;
         }
 
-        // if course duration is not set, alert the user
-        
-
         if (!classroomData.startDate || !classroomData.endDate) {
             alert("Course start and end dates are required!");
             return;
