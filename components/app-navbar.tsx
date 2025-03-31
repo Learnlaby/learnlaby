@@ -140,7 +140,7 @@ const AppNavbar = () => {
             {showCreateModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-xl font-semibold mb-4">Create Classroom</h2>
+                        <h2 className="text-2xl font-semibold mb-4">Create Classroom</h2>
 
                         <label className="block mb-2">Classroom Name</label>
                         <input
@@ -173,11 +173,11 @@ const AppNavbar = () => {
 
                         <div className="flex justify-end gap-2 mt-4">
                             <button
-                                className="px-4 py-2 bg-gray-300 rounded-md"
+                                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded-md text-white"
                                 onClick={closeCreateModal}>Cancel
                             </button>
                             <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
                                 onClick={handleCreateClassroom}>Create
                             </button>
                         </div>
@@ -187,7 +187,7 @@ const AppNavbar = () => {
             {showJoinModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-xl font-semibold mb-4">Join Classroom</h2>
+                        <h2 className="text-2xl font-semibold mb-4">Join Classroom</h2>
 
                         <label className="block mb-2">Enter Class Code</label>
                         <input
@@ -200,11 +200,11 @@ const AppNavbar = () => {
 
                         <div className="flex justify-end gap-2 mt-4">
                             <button
-                                className="px-4 py-2 bg-gray-300 rounded-md"
+                                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded-md text-white rounded-md"
                                 onClick={closeJoinModal}>Cancel
                             </button>
                             <button
-                                className="px-4 py-2 bg-green-500 text-white rounded-md"
+                                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
                                 onClick={handleJoinClassroom}>Join
                             </button>
                         </div>
