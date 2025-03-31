@@ -92,6 +92,9 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.0.0
+      react-calendar:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-datepicker:
         specifier: ^8.1.0
         version: 8.1.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
