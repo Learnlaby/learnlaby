@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { FaBars, FaPlus } from "react-icons/fa";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import styles from './index.module.css';
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -18,6 +22,7 @@ const AppNavbar = () => {
         description: "",
     });
     const { data: session } = useSession()
+    const router = useRouter();
 
     // Toggle for main popup
     const togglePopup = () => { setShowPopup(!showPopup); };
@@ -85,6 +90,14 @@ const AppNavbar = () => {
         }
     };
 
+    const handleLogout = async () => {
+        const confirmLogout = window.confirm("Are you sure you want to log out?")
+        if (confirmLogout) {
+          await signOut({ redirect: false })
+          router.replace("http://localhost:3000/") // redirect to sign-in page
+        }
+      }
+
     return (
         <>
             {/* Navbar */}
@@ -120,7 +133,7 @@ const AppNavbar = () => {
                         </div>
                     )}
 
-                    <button className="p-1 rounded-full hover:bg-gray-200">
+                    {/* <button className="p-1 rounded-full hover:bg-gray-200">
                         <a href="/profile">
                             {session && session.user && (
                                 <Image
@@ -132,7 +145,40 @@ const AppNavbar = () => {
                                 />
                             )}
                         </a>
-                    </button>
+                    </button> */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="p-1 rounded-full hover:bg-gray-200">
+                            {session?.user && (
+                                <Image
+                                src={session.user.image || "/default-profile.png"}
+                                alt={session.user.name || "User profile"}
+                                className="rounded-full w-8 h-8"
+                                width={80}
+                                height={80}
+                                />
+                            )}
+                            </button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent className="w-60 mr-4">
+                            <DropdownMenuLabel className="font-medium text-base">My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem disabled className="text-black">
+                                {session?.user?.name || "Unknown User"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled className="text-black">
+                                {session?.user?.email || "No Email"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                            onClick={handleLogout}
+                            className="text-red-500 cursor-pointer"
+                            >
+                            Logout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
                 </div>
             </nav>
 
