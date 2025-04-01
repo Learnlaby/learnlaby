@@ -224,6 +224,11 @@ export default function PeoplePage() {
         visible: true,
       });
 
+      // Auto-hide notification after 2 seconds
+      setTimeout(() => {
+        setNotification(null);
+      }, 2000);
+
       // Reset form
       setInvitePeople([{ email: "", role: "student", id: "1" }]);
     }
@@ -240,8 +245,14 @@ export default function PeoplePage() {
       type: "success",
       visible: true,
     });
+    // Auto-hide notification after 2 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 2000);
+
   };
 
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
