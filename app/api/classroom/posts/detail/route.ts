@@ -26,10 +26,18 @@ export async function POST(request: Request) {
         const post = await prisma.post.findUnique({
             where: { id: postId },
             include: {
-                author: { select: { name: true } },
-                // files: { select: { id: true, fileUrl: true } },
-            }
-        });
+              files: true,
+              author: true,
+              section: true,
+              submissions: {
+                include: {
+                  files: true,
+                  grade: true,
+                }
+              }
+            },
+          });
+          
 
         if (!post) {
             return new Response(
