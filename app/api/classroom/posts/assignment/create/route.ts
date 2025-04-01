@@ -75,7 +75,6 @@ export async function POST(request: Request) {
                 content,
                 dueDate,
                 sectionId,
-                isTeamAssignment: false,
                 maxScore,
             }
         });
