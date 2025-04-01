@@ -1,51 +1,74 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { UserPlus, X, Plus, Send, Trash2, Copy, QrCode, Mail } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  UserPlus,
+  X,
+  Plus,
+  Send,
+  Trash2,
+  Copy,
+  QrCode,
+  Mail,
+} from "lucide-react";
 
 type InvitePerson = {
-  email: string
-  role: "student" | "co-teacher"
-  id: string
-}
+  email: string;
+  role: "student" | "co-teacher";
+  id: string;
+};
 
 export default function PeoplePage() {
   const [members, setMembers] = useState<
-    { id: string; name: string; email: string; role: string; image?: string | null }[]
-  >([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
-  const [isInviting, setIsInviting] = useState(false)
-  const [activeTab, setActiveTab] = useState<"code" | "email">("code")
+    {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      image?: string | null;
+    }[]
+  >([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"code" | "email">("code");
   const [notification, setNotification] = useState<{
-    title: string
-    message: string
-    type: "success" | "error"
-    visible: boolean
-  } | null>(null)
+    title: string;
+    message: string;
+    type: "success" | "error";
+    visible: boolean;
+  } | null>(null);
 
   // State for people to invite
-  const [invitePeople, setInvitePeople] = useState<InvitePerson[]>([{ email: "", role: "student", id: "1" }])
+  const [invitePeople, setInvitePeople] = useState<InvitePerson[]>([
+    { email: "", role: "student", id: "1" },
+  ]);
 
-  const params = useParams()
-  const classroomId = params?.id as string
+  const params = useParams();
+  const classroomId = params?.id as string;
 
   // Mock classroom code - in a real app, this would come from your backend
-  const [classroomCode, setClassCode] = useState<String>("")
-  
+  const [classroomCode, setClassCode] = useState<string>("");
+
   useEffect(() => {
     async function fetchMembers() {
       if (!classroomId) {
-        setError("Classroom ID is missing.")
-        setLoading(false)
-        return
+        setError("Classroom ID is missing.");
+        setLoading(false);
+        return;
       }
 
       try {
@@ -53,61 +76,72 @@ export default function PeoplePage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
-        })
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch classroom members")
+          throw new Error("Failed to fetch classroom members");
         }
 
-        const data = await response.json()
-        setMembers(data.members)
+        const data = await response.json();
+        setMembers(data.members);
       } catch (err) {
-        setError((err as Error).message)
+        setError((err as Error).message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 
     async function fetchClassroomCode() {
       if (!classroomId) {
-        setError("Classroom ID is missing.")
-        setLoading(false)
-        return
+        setError("Classroom ID is missing.");
+        setLoading(false);
+        return;
       }
 
       try {
-        const response = await fetch("/api/classroom/"+classroomId, {
+        const response = await fetch("/api/classroom/" + classroomId, {
           method: "GET",
-          headers: { "Content-Type": "application/json" }
-        })
+          headers: { "Content-Type": "application/json" },
+        });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch classroom")
+          throw new Error("Failed to fetch classroom");
         }
 
-        const data = await response.json()
-        setClassCode(data.code)
+        const data = await response.json();
+        setClassCode(data.code);
       } catch (err) {
-        setError((err as Error).message)
+        setError((err as Error).message);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchClassroomCode()
-    fetchMembers()
-  }, [classroomId])
+    fetchClassroomCode();
+    fetchMembers();
+  }, [classroomId]);
 
   const handleEmailChange = (id: string, email: string) => {
-    setInvitePeople(invitePeople.map((person) => (person.id === id ? { ...person, email } : person)))
-  }
+    setInvitePeople(
+      invitePeople.map((person) =>
+        person.id === id ? { ...person, email } : person
+      )
+    );
+  };
 
   const handleRoleChange = (id: string, role: "student" | "co-teacher") => {
-    setInvitePeople(invitePeople.map((person) => (person.id === id ? { ...person, role } : person)))
-  }
+    setInvitePeople(
+      invitePeople.map((person) =>
+        person.id === id ? { ...person, role } : person
+      )
+    );
+  };
 
   const addPersonField = () => {
-    const newId = Date.now().toString()
-    setInvitePeople([...invitePeople, { email: "", role: "student", id: newId }])
+    const newId = Date.now().toString();
+    setInvitePeople([
+      ...invitePeople,
+      { email: "", role: "student", id: newId },
+    ]);
 
     // Show notification
     // setNotification({
@@ -119,19 +153,21 @@ export default function PeoplePage() {
 
     // Auto-hide notification after 2 seconds
     setTimeout(() => {
-      setNotification(null)
-    }, 2000)
-  }
+      setNotification(null);
+    }, 2000);
+  };
 
   const removePersonField = (id: string) => {
     if (invitePeople.length > 1) {
-      setInvitePeople(invitePeople.filter((person) => person.id !== id))
+      setInvitePeople(invitePeople.filter((person) => person.id !== id));
     }
-  }
+  };
 
   const validateEmails = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const invalidEmails = invitePeople.filter((person) => person.email.trim() !== "" && !emailRegex.test(person.email))
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalidEmails = invitePeople.filter(
+      (person) => person.email.trim() !== "" && !emailRegex.test(person.email)
+    );
 
     if (invalidEmails.length > 0) {
       setNotification({
@@ -139,32 +175,34 @@ export default function PeoplePage() {
         message: "Please enter valid email addresses",
         type: "error",
         visible: true,
-      })
-      return false
+      });
+      return false;
     }
 
     // Check for empty emails
-    const emptyEmails = invitePeople.filter((person) => person.email.trim() === "")
+    const emptyEmails = invitePeople.filter(
+      (person) => person.email.trim() === ""
+    );
     if (emptyEmails.length === invitePeople.length) {
       setNotification({
         title: "No emails entered",
         message: "Please enter at least one email address",
         type: "error",
         visible: true,
-      })
-      return false
+      });
+      return false;
     }
 
-    return true
-  }
+    return true;
+  };
 
   const handleSendInvites = async () => {
-    if (activeTab === "email" && !validateEmails()) return
+    if (activeTab === "email" && !validateEmails()) return;
 
-    setIsInviting(true)
+    setIsInviting(true);
 
     // Mock API call - in a real app, this would send the invites
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (activeTab === "code") {
       setNotification({
@@ -172,54 +210,68 @@ export default function PeoplePage() {
         message: "Students can now join using this code",
         type: "success",
         visible: true,
-      })
+      });
     } else {
       // Filter out empty emails
-      const peopleToInvite = invitePeople.filter((person) => person.email.trim() !== "")
+      const peopleToInvite = invitePeople.filter(
+        (person) => person.email.trim() !== ""
+      );
 
       setNotification({
         title: "Invites sent!",
         message: `Sent invitations to ${peopleToInvite.length} people`,
         type: "success",
         visible: true,
-      })
+      });
 
       // Reset form
-      setInvitePeople([{ email: "", role: "student", id: "1" }])
+      setInvitePeople([{ email: "", role: "student", id: "1" }]);
     }
 
-    setIsInviting(false)
-    setIsInviteDialogOpen(false)
-  }
+    setIsInviting(false);
+    setIsInviteDialogOpen(false);
+  };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(text);
     setNotification({
       title: "Copied to clipboard",
       message: "The classroom code has been copied to your clipboard",
       type: "success",
       visible: true,
-    })
-  }
+    });
+  };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading members...</div>
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading members...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        Error: {error}
+      </div>
+    );
   }
 
   // Separate teachers and students
-  const teachers = members.filter((member) => member.role === "teacher" || member.role === "co-teacher")
-  const students = members.filter((member) => member.role === "student")
+  const teachers = members.filter(
+    (member) => member.role === "teacher" || member.role === "co-teacher"
+  );
+  const students = members.filter((member) => member.role === "student");
 
   return (
     <>
       {notification && notification.visible && (
         <Alert
           className={`fixed top-4 right-4 w-96 z-50 ${
-            notification.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+            notification.type === "success"
+              ? "bg-green-50 border-green-200"
+              : "bg-red-50 border-red-200"
           }`}
         >
           <AlertTitle className="flex justify-between">
@@ -240,22 +292,32 @@ export default function PeoplePage() {
             {teachers.length > 0 ? (
               <div className="space-y-2">
                 {teachers.map((teacher) => (
-                  <div key={teacher.id} className="flex items-center gap-3 p-2 hover:bg-accent rounded-lg">
+                  <div
+                    key={teacher.id}
+                    className="flex items-center gap-3 p-2 hover:bg-accent rounded-lg"
+                  >
                     <Avatar>
-                      <AvatarImage src={teacher.image || "https://placekitten.com/100/100"} alt={teacher.name} />
+                      <AvatarImage
+                        src={teacher.image || "https://placekitten.com/100/100"}
+                        alt={teacher.name}
+                      />
                       <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       <span>{teacher.name}</span>
                       <span className="text-sm text-muted-foreground">
-                        {teacher.role === "co-teacher" ? "Co-Teacher" : "Teacher"}
+                        {teacher.role === "co-teacher"
+                          ? "Co-Teacher"
+                          : "Teacher"}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No teachers in this classroom.</p>
+              <p className="text-sm text-muted-foreground">
+                No teachers in this classroom.
+              </p>
             )}
           </div>
 
@@ -264,7 +326,9 @@ export default function PeoplePage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Students</h2>
               <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">{students.length} Students</span>
+                <span className="text-sm text-muted-foreground">
+                  {students.length} Students
+                </span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -279,9 +343,15 @@ export default function PeoplePage() {
             {students.length > 0 ? (
               <div className="space-y-2">
                 {students.map((student) => (
-                  <div key={student.id} className="flex items-center gap-3 p-2 hover:bg-accent rounded-lg">
+                  <div
+                    key={student.id}
+                    className="flex items-center gap-3 p-2 hover:bg-accent rounded-lg"
+                  >
                     <Avatar>
-                      <AvatarImage src={student.image || "https://placekitten.com/100/100"} alt={student.name} />
+                      <AvatarImage
+                        src={student.image || "https://placekitten.com/100/100"}
+                        alt={student.name}
+                      />
                       <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span>{student.name}</span>
@@ -289,7 +359,9 @@ export default function PeoplePage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No students in this classroom.</p>
+              <p className="text-sm text-muted-foreground">
+                No students in this classroom.
+              </p>
             )}
           </div>
         </div>
@@ -302,12 +374,19 @@ export default function PeoplePage() {
             <div className="flex items-center justify-between">
               <DialogTitle>Add People</DialogTitle>
               {activeTab === "email" && (
-                <Button variant="outline" size="icon" onClick={addPersonField} className="rounded-lg">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={addPersonField}
+                  className="rounded-lg"
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               )}
             </div>
-            <DialogDescription>Invite people to join your classroom</DialogDescription>
+            <DialogDescription>
+              Invite people to join your classroom
+            </DialogDescription>
           </DialogHeader>
 
           <div className="mt-4">
@@ -339,9 +418,15 @@ export default function PeoplePage() {
             {activeTab === "code" && (
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Classroom Code</label>
+                  <label className="text-sm font-medium mb-1.5 block">
+                    Classroom Code
+                  </label>
                   <div className="flex">
-                    <Input value={classroomCode} readOnly className="font-mono text-lg" />
+                    <Input
+                      value={classroomCode}
+                      readOnly
+                      className="font-mono text-lg"
+                    />
                     <Button
                       variant="outline"
                       size="icon"
@@ -358,7 +443,9 @@ export default function PeoplePage() {
                   <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
                     <li>Students go to the join page</li>
                     <li>They enter the classroom code</li>
-                    <li>You'll receive a notification to approve their request</li>
+                    <li>
+                      You'll receive a notification to approve their request
+                    </li>
                     <li>Once approved, they'll be added to your classroom</li>
                   </ol>
                 </div>
@@ -369,22 +456,36 @@ export default function PeoplePage() {
               <div className="max-h-[60vh] overflow-y-auto pr-2">
                 <div className="space-y-4">
                   {invitePeople.map((person, index) => (
-                    <div key={person.id} className="flex gap-2 items-center p-4 border rounded-lg">
+                    <div
+                      key={person.id}
+                      className="flex gap-2 items-center p-4 border rounded-lg"
+                    >
                       <div className="flex-1">
-                        <label className="text-sm font-medium mb-1.5 block">Email</label>
+                        <label className="text-sm font-medium mb-1.5 block">
+                          Email
+                        </label>
                         <Input
                           type="email"
                           placeholder="email@example.com"
                           value={person.email}
-                          onChange={(e) => handleEmailChange(person.id, e.target.value)}
+                          onChange={(e) =>
+                            handleEmailChange(person.id, e.target.value)
+                          }
                         />
                       </div>
                       <div className="w-32">
-                        <label className="text-sm font-medium mb-1.5 block">Role</label>
+                        <label className="text-sm font-medium mb-1.5 block">
+                          Role
+                        </label>
                         <select
                           className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
                           value={person.role}
-                          onChange={(e) => handleRoleChange(person.id, e.target.value as "student" | "co-teacher")}
+                          onChange={(e) =>
+                            handleRoleChange(
+                              person.id,
+                              e.target.value as "student" | "co-teacher"
+                            )
+                          }
                         >
                           <option value="student">Student</option>
                           <option value="co-teacher">Teacher</option>
@@ -424,27 +525,28 @@ export default function PeoplePage() {
               </span>
             )}
           </Button> */}
-          <Button
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
-            disabled={isInviting}
-            onClick={handleSendInvites}
-          >
-            {isInviting ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                {activeTab === "code" ? "Creating..." : "Sending..."}
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                {activeTab === "code" ? "Create Code" : "Send Invitations"}
-              </span>
-            )
-            }
-          </Button>
+          {/* here is the worked one */}
+          {activeTab === "email" && (
+            <Button
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
+              disabled={isInviting}
+              onClick={handleSendInvites}
+            >
+              {isInviting ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  Sending...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Send className="h-4 w-4" />
+                  Send Invitations
+                </span>
+              )}
+            </Button>
+          )}
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }
-
