@@ -113,21 +113,24 @@ model Submission {
   studentId   String?
   submittedAt DateTime @default(now())
 
-  post       Post    @relation(fields: [postId], references: [id])
-  student    User?   @relation(fields: [studentId], references: [id])
-  files      File[]
+  post     Post    @relation(fields: [postId], references: [id])
+  student  User?   @relation(fields: [studentId], references: [id])
+  files    File[]
+  grade    Grade?
 }
 
 model Grade {
   id           String      @id @default(cuid())
-  submissionId String
+  submissionId String @unique
   studentId    String?
   score        Decimal  @db.Decimal(5, 2)
   feedback     String?
   gradedAt     DateTime @default(now())
 
+  submission Submission @relation(fields: [submissionId], references: [id])
   student    User?      @relation(fields: [studentId], references: [id])
 }
+
 
 model Comment {
   id        String      @id @default(cuid())
