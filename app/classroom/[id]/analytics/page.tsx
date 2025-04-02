@@ -28,11 +28,67 @@ const assignmentsData = [
   { name: "Assignment 5", avgScore: 65 },
 ];
 
+// Sample data for submission status
+const submissionStatusData = {
+  "Assignment 1": [
+    { name: "On Time", value: 15, color: "#5CB338" },
+    { name: "Late", value: 7, color: "#FFA447" },
+    { name: "Not Submitted", value: 3, color: "#FB4141" },
+  ],
+  "Assignment 2": [
+    { name: "On Time", value: 12, color: "#5CB338" },
+    { name: "Late", value: 9, color: "#FFA447" },
+    { name: "Not Submitted", value: 4, color: "#FB4141" },
+  ],
+  "Assignment 3": [
+    { name: "On Time", value: 18, color: "#5CB338" },
+    { name: "Late", value: 4, color: "#FFA447" },
+    { name: "Not Submitted", value: 3, color: "#FB4141" },
+  ],
+  "Assignment 4": [
+    { name: "On Time", value: 14, color: "#5CB338" },
+    { name: "Late", value: 8, color: "#FFA447" },
+    { name: "Not Submitted", value: 3, color: "#FB4141" },
+  ],
+  "Assignment 5": [
+    { name: "On Time", value: 10, color: "#5CB338" },
+    { name: "Late", value: 10, color: "#FFA447" },
+    { name: "Not Submitted", value: 5, color: "#FB4141" },
+  ],
+};
+
+const students = [
+  {
+    name: "XXXXX XXXXXX",
+    id: "6510545xxx",
+    email: "xxxxxxxxxx@ku.th",
+    performance: "+16%",
+    status: "All assignments submitted",
+    avatarColor: "bg-pink-100",
+  },
+  {
+    name: "XXXXX XXXXXX",
+    id: "6510545xxx",
+    email: "xxxxxxxxxy@ku.th",
+    performance: "-4%",
+    status: "Missing 2 assignments",
+    avatarColor: "bg-blue-100",
+  },
+  {
+    name: "XXXXX XXXXXX",
+    id: "6510545xxx",
+    email: "xxxxxxxxxz@ku.th",
+    performance: "+25%",
+    status: "1 late submission",
+    avatarColor: "bg-yellow-100",
+  },
+];
+
 // calculate average scores and trends
 const avgScore = assignmentsData.reduce((sum, item) => sum + item.avgScore, 0) / assignmentsData.length;
 
 export default function AnalyticsPage() {
-
+  const [selectedAssignment, setSelectedAssignment] = useState("Assignment 1");
   
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -63,7 +119,7 @@ export default function AnalyticsPage() {
                   axisLine={false}
                 />
                 <Tooltip />
-                <Bar dataKey="avgScore" fill="#C68EFD" radius={8}>
+                <Bar dataKey="avgScore" fill="#7E1891" radius={8}>
                   <LabelList
                     dataKey="avgScore"
                     position="top"
@@ -82,9 +138,60 @@ export default function AnalyticsPage() {
             </div>
           </CardFooter>
         </Card>
-
+                  
+          {/* Submission Status */}
+          <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Submission Status</CardTitle>
+              <CardDescription>On time, late, and missing submissions</CardDescription>
+            </div>
+            <Select
+              value={selectedAssignment}
+              onValueChange={setSelectedAssignment}
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Select assignment" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(submissionStatusData).map((assignment) => (
+                  <SelectItem key={assignment} value={assignment}>
+                    {assignment}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={submissionStatusData[selectedAssignment]}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  {submissionStatusData[selectedAssignment].map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+          <CardFooter className="flex-col items-end gap-2">
+            <div className="flex gap-2 font-medium leading-none text-gray-600">
+            Total students: {submissionStatusData[selectedAssignment].reduce((sum, item) => sum + item.value, 0)}
+            </div>
+          </CardFooter>
+        </Card>
       </div>
-
+      
     </div>
   )
 }
