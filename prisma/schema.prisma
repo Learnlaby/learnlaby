@@ -11,8 +11,8 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  name          String?    @db.VarChar(100)
+  id            String    @id @default(cuid())
+  name          String?   @db.VarChar(100)
   email         String    @unique @db.VarChar(255)
   password      String?
   createdAt     DateTime  @default(now())
@@ -43,19 +43,19 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model Classroom {
-  id        String      @id @default(cuid())
-  name      String   @db.VarChar(255)
-  code      String   @unique @default(cuid())
-  ownerId   String
-  createdAt DateTime @default(now())
-  image         String?
-  description         String?
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
+  code        String   @unique @default(cuid())
+  ownerId     String
+  createdAt   DateTime @default(now())
+  image       String?
+  description String?
 
   owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
   posts           Post[]
@@ -65,74 +65,73 @@ model Classroom {
 }
 
 model ClassroomMember {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   classroomId String
   userId      String
   role        String   @db.VarChar(20) // 'student', 'teacher', 'co-teacher'
   joinedAt    DateTime @default(now())
 
-  classroom Classroom @relation(fields: [classroomId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model StudentProgress {
-  id                   String      @id @default(cuid())
+  id                   String   @id @default(cuid())
   studentId            String
   classroomId          String
   assignmentsCompleted Int
   totalScore           Decimal  @db.Decimal(5, 2)
   lastUpdated          DateTime @updatedAt
 
-  student   User      @relation(fields: [studentId], references: [id])
-  classroom Classroom @relation(fields: [classroomId], references: [id])
+  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
 }
 
 model Post {
-  id               String       @id @default(cuid())
-  classroomId      String
-  userId           String
-  sectionId        String?   
-  type             String    @db.VarChar(20) // 'announcement', 'material', 'assignment'
-  title            String?   @db.VarChar(255)
-  content          String?
-  dueDate          DateTime?
-  maxScore         Int?
-  createdAt        DateTime  @default(now())
+  id          String    @id @default(cuid())
+  classroomId String
+  userId      String
+  sectionId   String?
+  type        String    @db.VarChar(20) // 'announcement', 'material', 'assignment'
+  title       String?   @db.VarChar(255)
+  content     String?
+  dueDate     DateTime?
+  maxScore    Int?
+  createdAt   DateTime  @default(now())
 
-  classroom   Classroom  @relation(fields: [classroomId], references: [id])
-  author      User       @relation(fields: [userId], references: [id])
-  section     Section?   @relation(fields: [sectionId], references: [id])
+  classroom   Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  author      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  section     Section?     @relation(fields: [sectionId], references: [id])
   comments    Comment[]
   submissions Submission[]
   files       File[]
 }
 
 model Submission {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   postId      String
   studentId   String?
   submittedAt DateTime @default(now())
 
-  post     Post    @relation(fields: [postId], references: [id])
-  student  User?   @relation(fields: [studentId], references: [id])
-  files    File[]
-  grade    Grade?
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  student User?  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  files   File[]
+  grade   Grade?
 }
 
 model Grade {
-  id           String      @id @default(cuid())
-  submissionId String @unique
+  id           String   @id @default(cuid())
+  submissionId String   @unique
   studentId    String?
   score        Decimal  @db.Decimal(5, 2)
   gradedAt     DateTime @default(now())
 
-  submission Submission @relation(fields: [submissionId], references: [id])
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
   student    User?      @relation(fields: [studentId], references: [id])
 }
 
-
 model Comment {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   postId    String
   content   String
@@ -143,21 +142,22 @@ model Comment {
 }
 
 model File {
-  id      String @id @default(cuid())
-  postId  String?
+  id           String  @id @default(cuid())
+  postId       String?
   submissionId String?
-  url     String @db.Text // S3 bucket URL
-  post    Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  url          String  @db.Text // S3 bucket URL
+  name         String  @default("Untitled")
+
+  post       Post?       @relation(fields: [postId], references: [id], onDelete: Cascade)
   submission Submission? @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
-
 model Section {
-  id          String    @id @default(cuid())
-  name        String    @db.VarChar(255)
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(255)
   classroomId String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  classroom Classroom @relation(fields: [classroomId], references: [id])
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   posts     Post[]
 }
