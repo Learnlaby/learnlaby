@@ -3,6 +3,9 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Send } from 'lucide-react';
 
 interface Classroom {
   id: string;
@@ -123,36 +126,62 @@ const StreamPage = () => {
       </div>
 
       {/* Create Post Section */}
-      <div className="px-6 py-4 border-b">
-        <h2 className="text-xl font-semibold mb-4">Create an Announcement</h2>
-        <form onSubmit={handlePostSubmit}>
-          <textarea
-            className="w-full p-3 border rounded-lg"
-            placeholder="What's on your mind?"
-            value={newPostContent}
-            onChange={(e) => setNewPostContent(e.target.value)}
-            rows={4}
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg disabled:bg-gray-300"
-          >
-            {isSubmitting ? "Posting..." : "Post"}
-          </button>
-        </form>
+      <div className="px-10 py-8">
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Create an Announcement</h2>
+            <form onSubmit={handlePostSubmit}>
+              <textarea
+                className="w-full p-3 border rounded-lg"
+                placeholder="What's on your mind?"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                rows={4}
+              />
+              <div className="flex justify-end mt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="mt-4 px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg disabled:bg-gray-300"
+                >
+                  {isSubmitting ? "Posting..." : "Post"}
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Announcements Section */}
-      <div className="px-6 py-4">
+      <div className="px-10 py-4">
         <h2 className="text-xl font-semibold mb-4">Announcements</h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {posts.length > 0 ? (
             posts.map((post) => (
-              <div key={post.id} className="border rounded-lg p-4 shadow-md">
+              <div key={post.id} className="border rounded-lg p-6 shadow-md bg-white">
                 <h3 className="text-lg font-semibold">{post.author?.name || "You"}</h3>
-                <p className="text-sm text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
-                <p className="mt-2 text-gray-800">{post.content}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(post.createdAt).toLocaleDateString()} {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+                <p className="mt-3 text-gray-800">{post.content}</p>
+                
+                <Separator className="mt-5 bg-gray-300" />
+
+                {/* Comment Section */}
+                <div className="p-4 rounded-lg">
+                  <h4 className="text-md font-semibold mb-2">Comments</h4>
+                  <div className="flex items-center space-x-2">
+                    <textarea
+                      className="w-full h-10 border rounded-2xl bg-white placeholder: pl-3 pt-1"
+                      placeholder="Add your comment"
+                    />
+                    <button
+                      className="px-2 py-2 bg-white hover:bg-gray-300 rounded-lg text-sm"
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))
           ) : (
@@ -160,6 +189,7 @@ const StreamPage = () => {
           )}
         </div>
       </div>
+
     </div>
   );
 };
