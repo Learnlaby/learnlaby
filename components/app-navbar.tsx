@@ -167,9 +167,9 @@ const AppNavbar = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ classroomCode: classCode }),
             });
+            console.log(response.json())
 
             if (!response.ok) throw new Error("Failed to join classroom");
-
             alert("Successfully joined the classroom!");
             closeJoinModal();
         } catch (error) {
