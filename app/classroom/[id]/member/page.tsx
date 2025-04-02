@@ -384,6 +384,9 @@ export default function PeoplePage() {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle>Add People</DialogTitle>
+            </div>
+            <DialogDescription className="flex justify-between">
+              Invite people to join your classroom
               {activeTab === "email" && (
                 <Button
                   variant="outline"
@@ -394,13 +397,10 @@ export default function PeoplePage() {
                   <Plus className="h-4 w-4" />
                 </Button>
               )}
-            </div>
-            <DialogDescription>
-              Invite people to join your classroom
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4">
+          <div className="">
             <div className="flex border-b mb-6">
               <button
                 onClick={() => setActiveTab("code")}
