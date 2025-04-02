@@ -160,14 +160,6 @@ export default function PeoplePage() {
       { email: "", role: "student", id: newId },
     ]);
 
-    // Show notification
-    // setNotification({
-    //   title: "New field added",
-    //   message: "Added a new email field",
-    //   type: "success",
-    //   visible: true,
-    // })
-
     // Auto-hide notification after 2 seconds
     setTimeout(() => {
       setNotification(null);
@@ -245,9 +237,6 @@ export default function PeoplePage() {
       setTimeout(() => {
         setNotification(null);
       }, 2000);
-
-      // rewrite to Reset the invitation form when dialog closes
-      // setInvitePeople([{ email: "", role: "student", id: "1" }]);
     }
 
     setIsInviting(false);
@@ -535,24 +524,6 @@ export default function PeoplePage() {
             )}
           </div>
 
-          {/* <Button
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
-            disabled={isInviting}
-            onClick={handleSendInvites}
-          >
-            {isInviting ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                {activeTab === "code" ? "Creating..." : "Sending..."}
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Send className="h-4 w-4" />
-                {activeTab === "code" ? "Create Code" : "Send Invitations"}
-              </span>
-            )}
-          </Button> */}
-          {/* here is the worked one */}
           {activeTab === "email" && (
             <Button
               className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-4"
