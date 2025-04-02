@@ -112,6 +112,7 @@ export async function POST(request: Request) {
                 data: {
                     url: fileUrl,
                     postId: assignment.id,
+                    name: file.name,
                 },
             });
 
