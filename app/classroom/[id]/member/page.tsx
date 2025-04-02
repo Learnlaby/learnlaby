@@ -26,7 +26,7 @@ import {
 
 type InvitePerson = {
   email: string;
-  role: "student" | "co-teacher";
+  role: "student" | "co-teacher" | "teacher";
   id: string;
 };
 
@@ -52,16 +52,30 @@ export default function PeoplePage() {
     visible: boolean;
   } | null>(null);
 
+  // Default invite state - use this to reset
+  const defaultInvitePerson: InvitePerson = {
+    email: "",
+    role: "student",
+    id: "1",
+  };
+
   // State for people to invite
   const [invitePeople, setInvitePeople] = useState<InvitePerson[]>([
-    { email: "", role: "student", id: "1" },
+    defaultInvitePerson, // rewrite to Reset the invitation form when dialog closes
   ]);
 
   const params = useParams();
   const classroomId = params?.id as string;
 
-  // classroom code 
+  // classroom code
   const [classroomCode, setClassCode] = useState<string>("");
+
+  // rewrite to Reset the invitation form when dialog closes; actual code
+  useEffect(() => {
+    if (!isInviteDialogOpen) {
+      setInvitePeople([{ ...defaultInvitePerson }]);
+    }
+  }, [isInviteDialogOpen]);
 
   useEffect(() => {
     async function fetchMembers() {
@@ -128,7 +142,10 @@ export default function PeoplePage() {
     );
   };
 
-  const handleRoleChange = (id: string, role: "student" | "co-teacher") => {
+  const handleRoleChange = (
+    id: string,
+    role: "student" | "co-teacher" | "teacher"
+  ) => {
     setInvitePeople(
       invitePeople.map((person) =>
         person.id === id ? { ...person, role } : person
@@ -229,8 +246,8 @@ export default function PeoplePage() {
         setNotification(null);
       }, 2000);
 
-      // Reset form
-      setInvitePeople([{ email: "", role: "student", id: "1" }]);
+      // rewrite to Reset the invitation form when dialog closes
+      // setInvitePeople([{ email: "", role: "student", id: "1" }]);
     }
 
     setIsInviting(false);
@@ -249,10 +266,8 @@ export default function PeoplePage() {
     setTimeout(() => {
       setNotification(null);
     }, 2000);
-
   };
 
-  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -501,7 +516,6 @@ export default function PeoplePage() {
                           <option value="student">Student</option>
                           <option value="co-teacher">Co-teacher</option>
                           <option value="teacher">Teacher</option>
-
                         </select>
                       </div>
                       {invitePeople.length > 1 && (
