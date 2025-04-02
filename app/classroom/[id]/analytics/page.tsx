@@ -1,7 +1,6 @@
 "use client"
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -18,6 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+
+const totalAssignments = 5;
 
 // Sample data for assignments
 const assignmentsData = [
@@ -62,24 +64,21 @@ const students = [
     name: "XXXXX XXXXXX",
     id: "6510545xxx",
     email: "xxxxxxxxxx@ku.th",
-    performance: "+16%",
-    status: "All assignments submitted",
+    submitted: 5,
     avatarColor: "bg-pink-100",
   },
   {
     name: "XXXXX XXXXXX",
     id: "6510545xxx",
     email: "xxxxxxxxxy@ku.th",
-    performance: "-4%",
-    status: "Missing 2 assignments",
+    submitted: 3,
     avatarColor: "bg-blue-100",
   },
   {
     name: "XXXXX XXXXXX",
     id: "6510545xxx",
     email: "xxxxxxxxxz@ku.th",
-    performance: "+25%",
-    status: "1 late submission",
+    submitted: 4,
     avatarColor: "bg-yellow-100",
   },
 ];
@@ -174,6 +173,7 @@ export default function AnalyticsPage() {
                   fill="#8884d8"
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}`}
+                  stroke="none"
                 >
                   {submissionStatusData[selectedAssignment].map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -191,6 +191,39 @@ export default function AnalyticsPage() {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Student List */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">List of students</CardTitle>
+          <CardDescription>Student performance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {students.map((student) => (
+              <div key={student.email} className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className={`h-12 w-12 ${student.avatarColor}`}>
+                    <AvatarImage src="/placeholder.svg" />
+                    <AvatarFallback>XX</AvatarFallback>
+                  </Avatar>
+                  <div className="grid gap-1">
+                    <div className="font-semibold">{student.name}</div>
+                    <div className="text-sm text-gray-500">{student.id}</div>
+                  </div>
+                </div>
+                <div className="grid gap-1 text-right">
+                  <div className="text-sm">{student.email}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Progress value={(student.submitted / totalAssignments) * 100} className="w-44 bg-gray-200 [&>div]:bg-blue-500" />
+                  <div className="text-sm font-medium text-gray-700">{((student.submitted / totalAssignments) * 100).toFixed(0)}% Submitted</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
       
     </div>
   )
