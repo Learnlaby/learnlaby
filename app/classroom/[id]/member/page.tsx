@@ -60,7 +60,7 @@ export default function PeoplePage() {
   const params = useParams();
   const classroomId = params?.id as string;
 
-  // Mock classroom code - in a real app, this would come from your backend
+  // classroom code 
   const [classroomCode, setClassCode] = useState<string>("");
 
   useEffect(() => {
@@ -499,7 +499,9 @@ export default function PeoplePage() {
                           }
                         >
                           <option value="student">Student</option>
-                          <option value="co-teacher">Teacher</option>
+                          <option value="co-teacher">Co-teacher</option>
+                          <option value="teacher">Teacher</option>
+
                         </select>
                       </div>
                       {invitePeople.length > 1 && (
