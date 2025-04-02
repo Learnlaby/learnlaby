@@ -77,21 +77,6 @@ export async function POST(req: Request) {
         // Use "primary" as the calendar ID
         const googleCalendarApiUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events`;
 
-        // const event = {
-        //     summary: `New Student Joined: ${session.user.email}`,
-        //     description: `User ${session.user.email} has joined the classroom.`,
-        //     start: {
-        //         dateTime: new Date().toISOString(), // Current time
-        //         timeZone: "UTC"
-        //     },
-        //     end: {
-        //         dateTime: new Date(new Date().getTime() + 3600000).toISOString(), // +1 hour
-        //         timeZone: "UTC"
-        //     }
-        // };
-
-        // Fixed event times in UTC+7 (Asia/Bangkok)
-
         const startDateTime = new Date("2025-03-18T09:00:00+07:00").toISOString();
 
         const endDateTime = new Date("2025-03-20T12:00:00+07:00").toISOString();
