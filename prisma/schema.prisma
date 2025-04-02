@@ -124,7 +124,6 @@ model Grade {
   submissionId String @unique
   studentId    String?
   score        Decimal  @db.Decimal(5, 2)
-  feedback     String?
   gradedAt     DateTime @default(now())
 
   submission Submission @relation(fields: [submissionId], references: [id])
