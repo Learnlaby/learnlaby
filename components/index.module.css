@@ -2,6 +2,19 @@ body {
     margin: 0; line-height: normal;
 }
 
+.bounceSoft {
+    animation: bounceSoft 2s infinite;
+}
+  
+@keyframes bounceSoft {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+}
+
  /* navbar */
 .learnlabyLogo {
     width: 410px;
