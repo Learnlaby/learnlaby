@@ -56,12 +56,25 @@ model Classroom {
   createdAt   DateTime @default(now())
   image       String?
   description String?
+  startDate   DateTime
+  endDate     DateTime
 
   owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
   posts           Post[]
   members         ClassroomMember[]
   studentProgress StudentProgress[]
   sections        Section[]
+  timeSlots       TimeSlot[]        @relation("ClassroomTimeSlots")
+}
+
+model TimeSlot {
+  id          String   @id @default(cuid())
+  classroomId String
+  day         String   // "Monday", "Tuesday", ...
+  startTime   String   // "HH:MM"
+  endTime     String   // "HH:MM"
+
+  classroom   Classroom @relation("ClassroomTimeSlots", fields: [classroomId], references: [id], onDelete: Cascade)
 }
 
 model ClassroomMember {
@@ -137,8 +150,8 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model File {
