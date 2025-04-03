@@ -32,9 +32,9 @@ const AppNavbar = () => {
         endDate: "",
     });
 
-    const creatClassroomURL = "/api/classroom/create";
-    const joinClassroomURL = "/api/classroom/join";
-    const signinURL = "http://localhost:3000/";
+    const creatClassroomAPI = "/api/classroom/create";
+    const joinClassroomAPI = "/api/classroom/join";
+    const signinAPI = "http://localhost:3000/";
     const defaultProfileImage = "/default-profile.png";
 
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -129,7 +129,7 @@ const AppNavbar = () => {
         }
 
         try {
-            const response = await fetch(creatClassroomURL, {
+            const response = await fetch(creatClassroomAPI, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...classroomData, timeSlots }),
@@ -152,7 +152,7 @@ const AppNavbar = () => {
         }
 
         try {
-            const response = await fetch(joinClassroomURL, {
+            const response = await fetch(joinClassroomAPI, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ classroomCode: classCode }),
@@ -171,7 +171,7 @@ const AppNavbar = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
             await signOut({ redirect: false })
-            router.replace(signinURL)
+            router.replace(signinAPI)
         }
     };
 

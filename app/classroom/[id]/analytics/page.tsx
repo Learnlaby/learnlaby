@@ -42,12 +42,14 @@ export default function AnalyticsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [selectedAssignment, setSelectedAssignment] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const submissionAPI = "/api/classroom/posts/assignment/submission";
+
 
   useEffect(() => {
     if (!classroomId) return;
 
     const fetchData = async () => {
-      const res = await fetch("/api/classroom/posts/assignment/submission", {
+      const res = await fetch(submissionAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId }),

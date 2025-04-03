@@ -25,16 +25,18 @@ export default function CreateClasswork() {
   const [loading, setLoading] = useState(false);
   const [topics, setTopics] = useState<{ id: string; name: string }[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const sectionAPI = "/api/classroom/posts/section";
+  const createAssignmentAPI = "/api/classroom/posts/assignment/create";
+  const createMaterialAPI = "/api/classroom/posts/material/create";
+  const classworkAPI = `/classroom/${classroomId}/classwork`;
 
   const router = useRouter();
 
   useEffect(() => {
-    console.log("Classroom ID:", classroomId);
-
     async function fetchTopics() {
       if (!classroomId) return;
       try {
-        const response = await fetch("/api/classroom/posts/section", {
+        const response = await fetch(sectionAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -85,9 +87,9 @@ export default function CreateClasswork() {
 
       files.forEach((file) => formData.append("files", file)); // Attach selected files
 
-      let apiEndpoint = "/api/classroom/posts/assignment/create";
+      let apiEndpoint = createAssignmentAPI;
       if (type === "Material") {
-        apiEndpoint = "/api/classroom/posts/material/create";
+        apiEndpoint = createMaterialAPI;
       }
 
       const response = await fetch(apiEndpoint, {
@@ -99,7 +101,7 @@ export default function CreateClasswork() {
         throw new Error(`Failed to create ${type.toLowerCase()}.`);
       }
 
-      router.push(`/classroom/${classroomId}/classwork`);
+      router.push(classworkAPI);
     } catch (error) {
       console.error(`Error creating ${type.toLowerCase()}:`, error);
       alert(`Error creating ${type.toLowerCase()}.`);
@@ -114,7 +116,7 @@ export default function CreateClasswork() {
         <div className="flex items-center text-black-600 space-x-4">
           <Button
             className="text-purple-600 bg-transparent hover:bg-gray-200 px-2 py-1 rounded-md"
-            onClick={() => router.push(`/classroom/${classroomId}/classwork`)}
+            onClick={() => router.push(classworkAPI)}
           >
             ← Back
           </Button>

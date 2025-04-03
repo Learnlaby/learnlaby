@@ -85,6 +85,16 @@ export default function Classwork() {
 
   const isTeacher = userRole === "teacher" || userRole === "co-teacher";
 
+  const memberAPI = "/api/classroom/member";
+  const classworkAPI = "/api/classroom/posts/classworks";
+  const commentOnPostAPI = "/api/classroom/comment[postId]";
+  const createSectionAPI = "/api/classroom/posts/section/create";
+  const commentAPI = "/api/classroom/comment";
+  const classworkCreateAPI = `/classroom/${classroomId}/classwork/create?type=`;
+  const classworkDetailAPI = `/classroom/${classroomId}/classwork/detail/`;
+  const classworkReviewAPI = `/classroom/${classroomId}/classwork/review/`;
+
+
   useEffect(() => {
     async function fetchUserRole() {
       if (!classroomId || !session?.user?.email) {
@@ -93,7 +103,7 @@ export default function Classwork() {
       }
 
       try {
-        const response = await fetch("/api/classroom/member", {
+        const response = await fetch(memberAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -130,7 +140,7 @@ export default function Classwork() {
 
       try {
         // Fetch all classwork posts with section details
-        const classworkResponse = await fetch("/api/classroom/posts/classworks", {
+        const classworkResponse = await fetch(classworkAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -195,7 +205,7 @@ export default function Classwork() {
   // Function to fetch comments for a post
   const fetchComments = async (postId: string): Promise<Comment[]> => {
     try {
-      const response = await fetch(`/api/classroom/comment?postId=${postId}`);
+      const response = await fetch(commentOnPostAPI.replace("[postId]", postId));
       if (!response.ok) {
         console.error("Failed to fetch comments for post", postId);
         return [];
@@ -214,7 +224,7 @@ export default function Classwork() {
     }
 
     try {
-      const response = await fetch("/api/classroom/posts/section/create", {
+      const response = await fetch(createSectionAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId, name: newSectionName }),
@@ -251,7 +261,7 @@ export default function Classwork() {
     }));
 
     try {
-      const response = await fetch("/api/classroom/comment", {
+      const response = await fetch(commentAPI, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -322,10 +332,10 @@ export default function Classwork() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setShowSectionDialog(true)}>New Section</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(`/classroom/${classroomId}/classwork/create?type=Assignment`)}>
+                <DropdownMenuItem onClick={() => router.push(`${classworkCreateAPI}Assignment`)}>
                   Assignment
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(`/classroom/${classroomId}/classwork/create?type=Material`)}>
+                <DropdownMenuItem onClick={() => router.push(`${classworkCreateAPI}Material`)}>
                   Material
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -374,7 +384,7 @@ export default function Classwork() {
                         <div>
                           <CardTitle
                             className="text-base font-medium cursor-pointer"
-                            onClick={() => router.push(`/classroom/${classroomId}/classwork/detail/${post.id}`)}
+                            onClick={() => router.push(`${classworkDetailAPI}${post.id}`)}
                           >
                             {post.title}
                           </CardTitle>
@@ -394,7 +404,7 @@ export default function Classwork() {
                         <Button
                           variant="outline"
                           className="text-purple-600 border-purple-600 hover:bg-purple-50 ml-4 whitespace-nowrap"
-                          onClick={() => router.push(`/classroom/${classroomId}/classwork/review/${post.id}`)}
+                          onClick={() => router.push(`${classworkReviewAPI}${post.id}`)}
                         >
                           Review Work
                         </Button>

@@ -45,6 +45,13 @@ const StreamPage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const postAPI = "/api/classroom/posts";
+  const announcementAPI = "/api/classroom/posts/announcements";
+  const classroomAPI = "/api/classroom/${id}";
+  const commentAPI = "/api/classroom/comment";
+  const fetchCommentsAPI = "/api/classroom/comment?postId=${postId}";
+  const defaultImage = "https://placehold.co/800x400";
+
   
   // State for post creation
   const [newPostContent, setNewPostContent] = useState<string>("");
@@ -59,7 +66,7 @@ const StreamPage = () => {
       if (!id) return;
 
       try {
-        const response = await fetch(`/api/classroom/${id}`);
+        const response = await fetch(classroomAPI);
         if (!response.ok) throw new Error("Failed to fetch classroom data");
 
         const data: Classroom = await response.json();
@@ -73,7 +80,7 @@ const StreamPage = () => {
       if (!id) return;
 
       try {
-        const response = await fetch("/api/classroom/posts", {
+        const response = await fetch(postAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId: id }),
@@ -102,7 +109,7 @@ const StreamPage = () => {
 
   const fetchComments = async (postId: string): Promise<Comment[]> => {
     try {
-      const response = await fetch(`/api/classroom/comment?postId=${postId}`);
+      const response = await fetch(fetchCommentsAPI.replace("${postId}", postId));
       if (!response.ok) {
         console.error("Failed to fetch comments for post", postId);
         return [];
@@ -121,7 +128,7 @@ const StreamPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/classroom/posts/announcements", {
+      const response = await fetch(announcementAPI, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +169,7 @@ const StreamPage = () => {
     }));
   
     try {
-      const response = await fetch("/api/classroom/comment", {
+      const response = await fetch(commentAPI, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -214,7 +221,7 @@ const StreamPage = () => {
       {/* Image Container */}
       <div className="relative w-full h-[30vh]">
         <Image
-          src={classroom.image || "https://placehold.co/800x400"}
+          src={classroom.image || defaultImage}
           alt="Classroom Image"
           layout="fill"
           objectFit="cover"
