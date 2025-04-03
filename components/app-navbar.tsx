@@ -31,7 +31,7 @@ const AppNavbar = () => {
         startDate: "",
         endDate: "",
     });
-    
+
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [currentTimeSlot, setCurrentTimeSlot] = useState<TimeSlot>({
         id: "",
@@ -39,24 +39,20 @@ const AppNavbar = () => {
         startTime: "",
         endTime: "",
     });
-    
+
     const { data: session } = useSession()
     const router = useRouter();
 
-    // Toggle for main popup
     const togglePopup = () => { setShowPopup(!showPopup); };
     const closePopup = () => { setShowPopup(false); };
-
-    // Toggle for Create Classroom Modal
-    const openCreateModal = () => { 
-        setShowCreateModal(true); 
-        closePopup(); 
-        setTimeSlots([]);  // reset time slots when opening modal
+    const openCreateModal = () => {
+        setShowCreateModal(true);
+        closePopup();
+        setTimeSlots([]);
     };
-    
-    const closeCreateModal = () => { 
-        setShowCreateModal(false); 
-        setClassroomData({ // reset form data
+    const closeCreateModal = () => {
+        setShowCreateModal(false);
+        setClassroomData({
             name: "",
             image: "",
             description: "",
@@ -65,24 +61,19 @@ const AppNavbar = () => {
         });
         setTimeSlots([]);
     };
-
-    // Toggle Join Classroom Modal
     const openJoinModal = () => { setShowJoinModal(true); closePopup(); };
     const closeJoinModal = () => { setShowJoinModal(false); };
 
-    // Handle form input changes for classroom data
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setClassroomData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle time slot input changes
     const handleTimeSlotChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setCurrentTimeSlot((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Add a time slot
     const addTimeSlot = () => {
         if (!currentTimeSlot.day || !currentTimeSlot.startTime || !currentTimeSlot.endTime) {
             alert("Please fill in all time slot fields!");
@@ -94,14 +85,13 @@ const AppNavbar = () => {
             return;
         }
 
-        const newTimeSlot = { // Create a new time slot with unique ID
+        const newTimeSlot = {
             ...currentTimeSlot,
             id: Date.now().toString(),
         };
 
         setTimeSlots([...timeSlots, newTimeSlot]);
-        
-        // reset current time slot form
+
         setCurrentTimeSlot({
             id: "",
             day: "Monday",
@@ -110,38 +100,23 @@ const AppNavbar = () => {
         });
     };
 
-    // remove a time slot
     const removeTimeSlot = (id: string) => {
         setTimeSlots(timeSlots.filter(slot => slot.id !== id));
     };
 
-    // Handle form submission
     const handleCreateClassroom = async () => {
-        if (!classroomData.name) {
-            alert("Classroom name is required!");
+        if (!classroomData.name || !classroomData.startDate || !classroomData.endDate || timeSlots.length === 0) {
+            alert("All fields and at least one time slot are required!");
             return;
         }
 
-        if (!classroomData.startDate || !classroomData.endDate) {
-            alert("Course start and end dates are required!");
-            return;
-        }
-
-        if (timeSlots.length === 0) {
-            alert("At least one time slot is required!");
-            return;
-        }
+        console.log(classroomData, timeSlots);
 
         try {
-            const dataToSubmit = {
-                ...classroomData,
-                timeSlots,
-            };
-
             const response = await fetch("/api/classroom/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dataToSubmit),
+                body: JSON.stringify({ ...classroomData, timeSlots }),
             });
 
             if (!response.ok) throw new Error("Failed to create classroom");
@@ -154,7 +129,6 @@ const AppNavbar = () => {
         }
     };
 
-    // Handle join classroom request
     const handleJoinClassroom = async () => {
         if (!classCode) {
             alert("Class code is required!");
@@ -167,7 +141,6 @@ const AppNavbar = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ classroomCode: classCode }),
             });
-            console.log(response.json())
 
             if (!response.ok) throw new Error("Failed to join classroom");
             alert("Successfully joined the classroom!");
@@ -181,8 +154,8 @@ const AppNavbar = () => {
     const handleLogout = async () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
-          await signOut({ redirect: false })
-          router.replace("http://localhost:3000/") // redirect to sign-in page
+            await signOut({ redirect: false })
+            router.replace("http://localhost:3000/")
         }
     };
 
@@ -228,15 +201,15 @@ const AppNavbar = () => {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="p-1 rounded-full hover:bg-gray-200">
-                            {session?.user && (
-                                <Image
-                                src={session.user.image || "/default-profile.png"}
-                                alt={session.user.name || "User profile"}
-                                className="rounded-full w-8 h-8"
-                                width={80}
-                                height={80}
-                                />
-                            )}
+                                {session?.user && (
+                                    <Image
+                                        src={session.user.image || "/default-profile.png"}
+                                        alt={session.user.name || "User profile"}
+                                        className="rounded-full w-8 h-8"
+                                        width={80}
+                                        height={80}
+                                    />
+                                )}
                             </button>
                         </DropdownMenuTrigger>
 
@@ -251,10 +224,10 @@ const AppNavbar = () => {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                            onClick={handleLogout}
-                            className="text-red-500 cursor-pointer"
+                                onClick={handleLogout}
+                                className="text-red-500 cursor-pointer"
                             >
-                            Logout
+                                Logout
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -328,7 +301,7 @@ const AppNavbar = () => {
 
                         {/* Time Slots*/}
                         <label className="block mb-2 font-medium">Time Slots <span className="text-red-500">*</span></label>
-                        
+
                         {/* Current time slots display */}
                         {timeSlots.length > 0 && (
                             <div className="mb-3">
@@ -336,7 +309,7 @@ const AppNavbar = () => {
                                     {timeSlots.map(slot => (
                                         <li key={slot.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                                             <span>{formatTimeSlot(slot)}</span>
-                                            <button 
+                                            <button
                                                 onClick={() => removeTimeSlot(slot.id)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
@@ -347,7 +320,7 @@ const AppNavbar = () => {
                                 </ul>
                             </div>
                         )}
-                        
+
                         {/* Add new time slot form*/}
                         <div className="flex items-end gap-2 mb-4">
                             <div className="flex-1">
