@@ -17,12 +17,15 @@ export default function StudentWorkPage() {
   const [score, setScore] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
 
+  const reviewAPI = "/api/classroom/submission/review";
+  const gradeAPI = "/api/classroom/submission/grade";
+
   useEffect(() => {
     const fetchSubmission = async () => {
       if (!submissionId) return;
 
       try {
-        const res = await fetch("/api/classroom/submission/review", {
+        const res = await fetch(reviewAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ submissionId }),
@@ -56,7 +59,7 @@ export default function StudentWorkPage() {
     }
 
     try {
-      const res = await fetch("/api/classroom/submission/grade", {
+      const res = await fetch(gradeAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

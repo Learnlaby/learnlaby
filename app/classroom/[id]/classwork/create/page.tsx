@@ -30,7 +30,6 @@ export default function CreateClasswork() {
   const sectionAPI = "/api/classroom/posts/section";
   const createAssimentAPI = "/api/classroom/posts/assignment/create";
   const createMaterialAPI = "/api/classroom/posts/material/create";
-  // `/classroom/${classroomId}/classwork`
   const classworkAPI = "/classroom/[classroomId]/classwork";
 
   useEffect(() => {
