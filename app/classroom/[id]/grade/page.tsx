@@ -15,11 +15,14 @@ export default function GradePage() {
   const [scores, setScores] = React.useState<{ [assignmentId: string]: { [studentId: string]: number | null } }>({})
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc")
 
+  const submissionAPI = "/api/classroom/posts/assignment/submission"
+  const avatarImage = "/placeholder.svg";
+
   React.useEffect(() => {
     if (!classroomId) return
 
     const fetchData = async () => {
-      const res = await fetch("/api/classroom/posts/assignment/submission", {
+      const res = await fetch(submissionAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId }),
@@ -57,13 +60,12 @@ export default function GradePage() {
         const formattedMembers = memberList.map((m: any) => ({
           id: m.id,
           name: m.name || "Unnamed",
-          avatar: m.image || "/placeholder.svg",
+          avatar: m.image || avatarImage,
         }))
 
         setAssignments(assignmentList)
         setStudents(formattedMembers)
         setScores(scoreMap)
-        console.log(scoreMap)
       }
     }
 
