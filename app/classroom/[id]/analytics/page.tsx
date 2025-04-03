@@ -43,11 +43,14 @@ export default function AnalyticsPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
+  const submissionAPI = "/api/classroom/posts/assignment/submission";
+  const avatarImage = "/placeholder.svg"
+
   useEffect(() => {
     if (!classroomId) return;
 
     const fetchData = async () => {
-      const res = await fetch("/api/classroom/posts/assignment/submission", {
+      const res = await fetch(submissionAPI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId }),
@@ -328,7 +331,7 @@ export default function AnalyticsPage() {
               <div key={student.email} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                   <Avatar className={`h-12 w-12 ${student.avatarColor}`}>
-                    <AvatarImage src={student.image || "/placeholder.svg"} />
+                    <AvatarImage src={student.image || avatarImage} alt={student.name} />
                     <AvatarFallback>{student.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">
