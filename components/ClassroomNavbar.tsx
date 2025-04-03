@@ -20,6 +20,12 @@ const ClassroomNavbar = () => {
   const { data: session } = useSession()
   const [userRole, setUserRole] = useState<string>("")
   const [loading, setLoading] = useState<boolean>(true)
+  const classroomStreamURL = `/classroom/${id}/stream`;
+  const classroomClassworkURL = `/classroom/${id}/classwork`;
+  const classroomMemberURL = `/classroom/${id}/member`;
+  const classroomGradeURL = `/classroom/${id}/grade`;
+  const classroomAnalyticsURL = `/classroom/${id}/analytics`;
+  const memberURL = "/api/classroom/member";
 
   useEffect(() => {
     async function fetchUserRole() {
@@ -29,7 +35,7 @@ const ClassroomNavbar = () => {
       }
 
       try {
-        const response = await fetch("/api/classroom/member", {
+        const response = await fetch(memberURL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId: id }),
@@ -72,22 +78,22 @@ const ClassroomNavbar = () => {
     <div className="border-b w-full" style={{ width: "100%" }}>
       <nav className="flex w-full items-center gap-6 px-6 py-4">
         <Link
-          href={`/classroom/${id}/stream`}
-          className={`flex items-center gap-2 ${isActive(`/classroom/${id}/stream`)}`}
+          href={classroomStreamURL}
+          className={`flex items-center gap-2 ${isActive(classroomStreamURL)}`}
         >
           <BookOpen className="w-4 h-4" />
           <span>Stream</span>
         </Link>
         <Link
-          href={`/classroom/${id}/classwork`}
-          className={`flex items-center gap-2 ${isActive(`/classroom/${id}/classwork`)}`}
+          href={classroomClassworkURL}
+          className={`flex items-center gap-2 ${isActive(classroomClassworkURL)}`}
         >
           <ClipboardList className="w-4 h-4" />
           <span>Classwork</span>
         </Link>
         <Link
-          href={`/classroom/${id}/member`}
-          className={`flex items-center gap-2 ${isActive(`/classroom/${id}/member`)}`}
+          href={classroomMemberURL}
+          className={`flex items-center gap-2 ${isActive(classroomMemberURL)}`}
         >
           <Users className="w-4 h-4" />
           <span>People</span>
@@ -96,15 +102,15 @@ const ClassroomNavbar = () => {
         {isTeacher && (
           <>
             <Link
-              href={`/classroom/${id}/grade`}
-              className={`flex items-center gap-2 ${isActive(`/classroom/${id}/grade`)}`}
+              href={classroomGradeURL}
+              className={`flex items-center gap-2 ${isActive(classroomGradeURL)}`}
             >
               <GradeIcon className="w-4 h-4" />
               <span>Grade</span>
             </Link>
             <Link
-              href={`/classroom/${id}/analytics`}
-              className={`flex items-center gap-2 ${isActive(`/classroom/${id}/analytics`)}`}
+              href={classroomAnalyticsURL}
+              className={`flex items-center gap-2 ${isActive(classroomAnalyticsURL)}`}
             >
               <BarChart3 className="w-4 h-4" />
               <span>Analytics</span>

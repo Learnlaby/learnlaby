@@ -33,12 +33,14 @@ export function AppSidebar() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const classroomURL = "/api/classroom";
+  const classroomDefaultImage = "https://placehold.co/10x10";
 
   // Fetch user classrooms
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        const response = await fetch("/api/classroom");
+        const response = await fetch(classroomURL);
         if (!response.ok) throw new Error("Failed to fetch classrooms");
 
         const data: Classroom[] = await response.json();
@@ -92,7 +94,7 @@ export function AppSidebar() {
                     className="flex items-center gap-3 p-0.5 rounded-lg"
                   >
                     <Image
-                        src={classroom.image || "https://placehold.co/10x10"}
+                        src={classroom.image || classroomDefaultImage}
                         alt={classroom.name || "Classroom profile"}
                         className="rounded-full w-7 h-7"
                         width={80}

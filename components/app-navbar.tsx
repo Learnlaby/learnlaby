@@ -32,6 +32,11 @@ const AppNavbar = () => {
         endDate: "",
     });
 
+    const creatClassroomURL = "/api/classroom/create";
+    const joinClassroomURL = "/api/classroom/join";
+    const signinURL = "http://localhost:3000/";
+    const defaultProfileImage = "/default-profile.png";
+
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [currentTimeSlot, setCurrentTimeSlot] = useState<TimeSlot>({
         id: "",
@@ -122,10 +127,9 @@ const AppNavbar = () => {
             alert("End date must be in the future!");
             return;
         }
-        console.log(classroomData, timeSlots);
 
         try {
-            const response = await fetch("/api/classroom/create", {
+            const response = await fetch(creatClassroomURL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...classroomData, timeSlots }),
@@ -148,7 +152,7 @@ const AppNavbar = () => {
         }
 
         try {
-            const response = await fetch("/api/classroom/join", {
+            const response = await fetch(joinClassroomURL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ classroomCode: classCode }),
@@ -167,7 +171,7 @@ const AppNavbar = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
             await signOut({ redirect: false })
-            router.replace("http://localhost:3000/")
+            router.replace(signinURL)
         }
     };
 
@@ -215,7 +219,7 @@ const AppNavbar = () => {
                             <button className="p-1 rounded-full hover:bg-gray-200">
                                 {session?.user && (
                                     <Image
-                                        src={session.user.image || "/default-profile.png"}
+                                        src={session.user.image || defaultProfileImage}
                                         alt={session.user.name || "User profile"}
                                         className="rounded-full w-8 h-8"
                                         width={80}
