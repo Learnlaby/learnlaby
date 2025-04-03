@@ -110,6 +110,18 @@ const AppNavbar = () => {
             return;
         }
 
+        if (new Date(classroomData.startDate) >= new Date(classroomData.endDate)) {
+            alert("Start date must be before end date!");
+            return;
+        }
+        if (new Date(classroomData.startDate) < new Date()) {
+            alert("Start date must be in the future!");
+            return;
+        }
+        if (new Date(classroomData.endDate) < new Date()) {
+            alert("End date must be in the future!");
+            return;
+        }
         console.log(classroomData, timeSlots);
 
         try {
