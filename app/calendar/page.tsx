@@ -1,10 +1,9 @@
 "use client";
 
 import Layout from "@/components/layout";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { CircularProgress } from "@mui/material"; // Optional: A loading spinner
 
 type SessionUser = {
   name?: string;
