@@ -2,6 +2,7 @@
 import * as React from "react";
 import Layout from "@/components/layout";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Assignment {
   id: string;
@@ -10,6 +11,9 @@ interface Assignment {
   dueDate: string | null;
   classroomId: string;
   status: "assigned" | "missing" | "done";
+  submitted: boolean;
+  submittedAt: string | null;
+  isLate: boolean;
 }
 
 interface AssignmentGroup {
@@ -24,6 +28,7 @@ export default function WorkPage() {
   const [assignments, setAssignments] = React.useState<Assignment[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
 
   React.useEffect(() => {
     async function fetchAssignments() {
@@ -43,6 +48,9 @@ export default function WorkPage() {
             dueDate: assignment.dueDate,
             classroomId: assignment.classroomId,
             status: assignment.status,
+            submitted: assignment.submitted,
+            submittedAt: assignment.submittedAt,
+            isLate: assignment.isLate
           }))
         );
       } catch (err) {
@@ -52,7 +60,6 @@ export default function WorkPage() {
         setLoading(false);
       }
     }
-
     fetchAssignments();
   }, []);
 
@@ -81,7 +88,7 @@ export default function WorkPage() {
   };
 
   const today = new Date();
-  const { start: startOfThisWeek, end: endOfThisWeek } = getWeekRange(today);
+  const { start: startOfThisWeek, end: endOfThisWeek } = getWeekRange(new Date(today));
   const { start: startOfNextWeek, end: endOfNextWeek } = getWeekRange(
     new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
   );
@@ -95,25 +102,34 @@ export default function WorkPage() {
   };
 
   assignments.forEach((assignment) => {
-    if (assignment.status === "done") { // Assuming done status is set when the assignment is completed
-      assignmentGroups.done.assignments.push(assignment);
+    if (assignment.status === "done") { // Check if the assignment is submitted
+      if (assignment.isLate) {  // Check if the assignment is submitted late, if so, add a note
+        const assignmentWithNote = {
+          ...assignment,
+          title: `${assignment.title}`
+        };
+        assignmentGroups.done.assignments.push(assignmentWithNote);
+      } else {
+        assignmentGroups.done.assignments.push(assignment);
+      }
       assignmentGroups.done.count++;
-    } else {
-      if (assignment.dueDate) {
-        const dueDate = new Date(assignment.dueDate);
-        if (dueDate >= startOfThisWeek && dueDate <= endOfThisWeek) {
-          assignmentGroups.thisWeek.assignments.push(assignment);
-          assignmentGroups.thisWeek.count++;
-        } else if (dueDate >= startOfNextWeek && dueDate <= endOfNextWeek) {
-          assignmentGroups.nextWeek.assignments.push(assignment);
-          assignmentGroups.nextWeek.count++;
-        } else if (dueDate > endOfNextWeek) {
-          assignmentGroups.later.assignments.push(assignment);
-          assignmentGroups.later.count++;
-        } else if (dueDate < startOfThisWeek) { // have to check the status of the assignment (missing or done)
-          assignmentGroups.missing.assignments.push(assignment);
-          assignmentGroups.missing.count++;
-        }
+    } 
+    else if (assignment.status === "missing") { // Check if the assignment is missing
+      assignmentGroups.missing.assignments.push(assignment);
+      assignmentGroups.missing.count++;
+    }
+    else if (assignment.dueDate) {
+      const dueDate = new Date(assignment.dueDate);
+      
+      if (dueDate >= startOfThisWeek && dueDate <= endOfThisWeek) {
+        assignmentGroups.thisWeek.assignments.push(assignment);
+        assignmentGroups.thisWeek.count++;
+      } else if (dueDate >= startOfNextWeek && dueDate <= endOfNextWeek) {
+        assignmentGroups.nextWeek.assignments.push(assignment);
+        assignmentGroups.nextWeek.count++;
+      } else if (dueDate > endOfNextWeek) {
+        assignmentGroups.later.assignments.push(assignment);
+        assignmentGroups.later.count++;
       }
     }
   });
@@ -133,8 +149,13 @@ export default function WorkPage() {
               </div>
               <div className="space-y-1 flex-grow overflow-y-auto">
                 {group.assignments.map((assignment) => (
-                  <div key={assignment.id} className="p-3 border rounded-3xl bg-white">
-                    <h4 className="text-sm font-medium mb-1">{assignment.title}</h4>
+                  <div key={assignment.id} className="p-3 border rounded-3xl bg-white cursor-pointer" onClick={() => router.push(`/classroom/${assignment.classroomId}/classwork/detail/${assignment.id}`)}>
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-sm font-medium mb-1">{assignment.title}</h4>
+                      {assignment.isLate && key === "done" && (
+                        <span className="text-red-600 text-sm">Late</span>
+                      )}
+                    </div>
                     <div className="flex justify-between text-sm text-gray-500">
                       <span>{assignment.className}</span>
                       {assignment.dueDate && (

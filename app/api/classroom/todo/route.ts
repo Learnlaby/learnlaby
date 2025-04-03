@@ -68,6 +68,11 @@ export async function GET(request: Request) {
                     where: {
                         studentId: user.id,
                     },
+                    select: {
+                        id: true,
+                        submittedAt: true,
+                        studentId: true
+                    }
                 },
             },
             orderBy: {
@@ -75,15 +80,37 @@ export async function GET(request: Request) {
             },
         });
 
-        const formattedAssignments = assignments.map(assignment => ({
-            id: assignment.id,
-            title: assignment.title,
-            dueDate: assignment.dueDate,
-            classroomName: assignment.classroom.name,
-            authorName: assignment.author.name,
-            submitted: assignment.submissions.length > 0,
-            classroomId: assignment.classroomId,
-        }));
+        // Process assignments to include status information
+        const formattedAssignments = assignments.map(assignment => {
+            const hasSubmission = assignment.submissions.length > 0;
+            const submission = hasSubmission ? assignment.submissions[0] : null;
+            
+            // Determine submission status
+            let status: "assigned" | "missing" | "done" = "assigned";
+            let isLate = false;
+            
+            if (hasSubmission) { // Assignment has been submitted, status is 'done'
+                status = "done";
+                if (assignment.dueDate && submission) { // Check if submission was late
+                    isLate = new Date(submission.submittedAt) > new Date(assignment.dueDate);
+                }
+            } else if (assignment.dueDate && new Date(assignment.dueDate) < new Date()) {
+                status = "missing"; // Assignment is past due date and not submitted
+            }
+
+            return {
+                id: assignment.id,
+                title: assignment.title,
+                dueDate: assignment.dueDate,
+                classroomName: assignment.classroom.name,
+                authorName: assignment.author.name,
+                classroomId: assignment.classroomId,
+                status: status,
+                submitted: hasSubmission,
+                submittedAt: submission?.submittedAt.toISOString() || null,
+                isLate: isLate
+            };
+        });
 
         return new Response(
             JSON.stringify({ assignments: formattedAssignments }),
