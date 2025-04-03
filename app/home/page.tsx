@@ -16,10 +16,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const classroomAPI = "/api/classroom";
+  const defaultImage = "https://placehold.co/216x160";
+
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        const response = await fetch("/api/classroom");
+        const response = await fetch(classroomAPI);
         if (!response.ok) throw new Error("Failed to fetch classrooms");
         const data = await response.json();
         setClassrooms(data);
@@ -46,7 +49,7 @@ export default function Home() {
               id={classroom.id}
               name={classroom.name}
               description={classroom.description || "No description available"}
-              image={classroom.image || "https://placehold.co/216x160"}
+              image={classroom.image || defaultImage}
             />
           ))
         }
