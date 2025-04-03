@@ -30,10 +30,13 @@ export default function WorkPage() {
   const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
 
+  const todoAPI = "/api/classroom/todo";
+  const classworkDetailAPI = "/classroom/[assignment.classroomId]/classwork/detail/[assignment.id]";
+
   React.useEffect(() => {
     async function fetchAssignments() {
       try {
-        const response = await fetch("/api/classroom/todo");
+        const response = await fetch(todoAPI);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.error || "Failed to fetch assignments.");
@@ -149,7 +152,7 @@ export default function WorkPage() {
               </div>
               <div className="space-y-1 flex-grow overflow-y-auto">
                 {group.assignments.map((assignment) => (
-                  <div key={assignment.id} className="p-3 border rounded-3xl bg-white cursor-pointer" onClick={() => router.push(`/classroom/${assignment.classroomId}/classwork/detail/${assignment.id}`)}>
+                  <div key={assignment.id} className="p-3 border rounded-3xl bg-white cursor-pointer" onClick={() => router.push(classworkDetailAPI.replace("[assignment.classroomId]", assignment.classroomId).replace("[assignment.id]", assignment.id))}>
                     <div className="flex justify-between items-center">
                       <h4 className="text-sm font-medium mb-1">{assignment.title}</h4>
                       {assignment.isLate && key === "done" && (
