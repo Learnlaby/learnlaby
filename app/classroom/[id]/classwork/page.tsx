@@ -89,10 +89,6 @@ export default function Classwork() {
   const classworkAPI = "/api/classroom/posts/classworks";
   const commentAPI = "/api/classroom/comment";
   const createSectionAPI = "/api/classroom/posts/section/create";
-//   `/classroom/${classroomId}/classwork/create?type=Assignment`
-// `/classroom/${classroomId}/classwork/create?type=Material`
-// `/classroom/${classroomId}/classwork/detail/${post.id}`
-// `/classroom/${classroomId}/classwork/review/${post.id}`
   const classworkCreateAPI = "/classroom/[classroomId]/classwork/create";
   const classworkReviewAPI = "/classroom/[classroomId]/classwork/review/[postId]";
   const classworkDetailAPI = "/classroom/[classroomId]/classwork/detail/[postId]";
