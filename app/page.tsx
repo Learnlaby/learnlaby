@@ -11,6 +11,8 @@ export default function SignIn() {
   const [password, setPassword] = useState('')
   const router = useRouter()
 
+  const homePage = "/home"
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -23,7 +25,7 @@ export default function SignIn() {
       if (result && result.error) {
         console.error(result.error)
       } else {
-        router.push('/home')
+        router.push(homePage)
       }
     } catch (error) {
       console.log('error', error)
