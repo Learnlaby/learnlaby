@@ -70,6 +70,10 @@ export default function PeoplePage() {
   // classroom code
   const [classroomCode, setClassCode] = useState<string>("");
 
+  const memberAPI = "/api/classroom/member";
+  const classroomAPI = "/api/classroom/" + classroomId;
+  const avatarImage = "https://placekitten.com/100/100";
+
   // rewrite to Reset the invitation form when dialog closes; actual code
   useEffect(() => {
     if (!isInviteDialogOpen) {
@@ -86,7 +90,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch("/api/classroom/member", {
+        const response = await fetch(memberAPI, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -113,7 +117,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch("/api/classroom/" + classroomId, {
+        const response = await fetch(classroomAPI, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -313,7 +317,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={teacher.image || "https://placekitten.com/100/100"}
+                        src={teacher.image || avatarImage}
                         alt={teacher.name}
                       />
                       <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
@@ -364,7 +368,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={student.image || "https://placekitten.com/100/100"}
+                        src={student.image || avatarImage}
                         alt={student.name}
                       />
                       <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
