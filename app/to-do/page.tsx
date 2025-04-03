@@ -37,6 +37,7 @@ export default function WorkPage() {
     async function fetchAssignments() {
       try {
         const response = await fetch(todoAPI);
+
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.error || "Failed to fetch assignments.");

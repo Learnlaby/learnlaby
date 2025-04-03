@@ -167,7 +167,7 @@ export default function ReviewWork() {
               .map((student) => (
                 <Link
                   key={student.id}
-                  href={`/classroom/${id}/classwork/review/${assignmentId}/${student.id}?name=${encodeURIComponent(student.name)}&status=${student.status}&docId=${student.docId}`}
+                  href={`${fileAPI}/${student.id}?name=${encodeURIComponent(student.name)}&status=${student.status}&docId=${student.docId}`}
                   className="bg-white rounded shadow block"
                 >
                   <div className="p-3 border-b flex items-center">
