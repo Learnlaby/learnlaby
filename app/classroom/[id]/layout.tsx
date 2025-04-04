@@ -18,17 +18,16 @@ export default function ClassroomLayout({
   const { data: session, status } = useSession();
   const { role, loading } = useClassroomRole(id as string);
 
-  const restrictedTeacherPaths = ["/grade", "/analytics"];
+  const teacherOnlyPaths = ["/grade", "/analytics", "/classwork/review"];
 
   useEffect(() => {
-    if (
-      !loading &&
-      restrictedTeacherPaths.some((p) => pathname.endsWith(p)) &&
-      !["teacher", "co-teacher"].includes(role)
-    ) {
-      router.replace(`/classroom/not-authorized`);
+    if (!loading && role !== "teacher" && role !== "co-teacher") {
+      const isRestricted = teacherOnlyPaths.some((p) => pathname.includes(p));
+      if (isRestricted) {
+        router.replace(`/classroom/not-authorized`);
+      }
     }
-  }, [pathname, role, loading, id, router]);
+  }, [pathname, role, loading, id, router]);  
 
   if (loading || status === "loading") {
     return (
