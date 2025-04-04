@@ -34,6 +34,7 @@ import {
   CLASSWORK_REVIEW_PAGE,
   CLASSWORK_DETAIL_PAGE,
 } from "@/lib/api_routes";
+import RoleBased from "@/app/components/RoleBased";
 
 // Add interfaces for our data models
 interface User {
@@ -92,8 +93,6 @@ export default function Classwork() {
   const router = useRouter();
   const classroomId = params?.id as string;
   const { data: session } = useSession();
-
-  const isTeacher = userRole === "teacher" || userRole === "co-teacher";
 
   useEffect(() => {
     async function fetchUserRole() {
@@ -323,7 +322,7 @@ export default function Classwork() {
             WELCOME TO CLASSWORK
           </a>
 
-          {isTeacher && (
+          <RoleBased allowedRoles={["teacher", "co-teacher"]} userRole={userRole}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="bg-purple-600 text-white rounded-full px-4 py-2 flex items-center">
@@ -340,7 +339,7 @@ export default function Classwork() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
+          </RoleBased>
         </div>
       </div>
 
@@ -400,7 +399,7 @@ export default function Classwork() {
                         </div>
                       </div>
 
-                      {post.type === "assignment" && isTeacher && (
+                      <RoleBased allowedRoles={["teacher", "co-teacher"]} userRole={userRole}>
                         <Button
                           variant="outline"
                           className="text-purple-600 border-purple-600 hover:bg-purple-50 ml-4 whitespace-nowrap"
@@ -408,7 +407,7 @@ export default function Classwork() {
                         >
                           Review Work
                         </Button>
-                      )}
+                      </RoleBased>
                     </div>
 
                     <CardContent className="pt-0">

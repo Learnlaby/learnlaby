@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ import {
   AVATAR_IMAGE,
   SEND_INVITATION,
 } from "@/lib/api_routes";
+import RoleBased from "@/app/components/RoleBased";
 
 type InvitePerson = {
   email: string;
@@ -52,6 +54,8 @@ export default function PeoplePage() {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [activeTab, setActiveTab] = useState<"code" | "email">("code");
+  const { data: session } = useSession();
+  const [userRole, setUserRole] = useState<string>("");
   const [notification, setNotification] = useState<{
     title: string;
     message: string;
@@ -83,6 +87,15 @@ export default function PeoplePage() {
       setInvitePeople([{ ...defaultInvitePerson }]);
     }
   }, [isInviteDialogOpen]);
+
+  useEffect(() => {
+    if (session?.user?.email && members.length > 0) {
+      const currentUser = members.find(member => member.email === session.user.email);
+      if (currentUser) {
+        setUserRole(currentUser.role);
+      }
+    }
+  }, [session, members]);
 
   useEffect(() => {
     async function fetchMembers() {
@@ -308,8 +321,8 @@ export default function PeoplePage() {
       {notification && notification.visible && (
         <Alert
           className={`fixed top-4 right-4 w-96 z-50 ${notification.type === "success"
-              ? "bg-green-50 border-green-200"
-              : "bg-red-50 border-red-200"
+            ? "bg-green-50 border-green-200"
+            : "bg-red-50 border-red-200"
             }`}
         >
           <AlertTitle className="flex justify-between">
@@ -367,15 +380,17 @@ export default function PeoplePage() {
                 <span className="text-sm text-muted-foreground">
                   {students.length} Students
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2 text-purple-600 border-purple-600 hover:bg-purple-50"
-                  onClick={() => setIsInviteDialogOpen(true)}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span>Add People</span>
-                </Button>
+                <RoleBased allowedRoles={["teacher", "co-teacher"]} userRole={userRole}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 text-purple-600 border-purple-600 hover:bg-purple-50"
+                    onClick={() => setIsInviteDialogOpen(true)}
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span>Add People</span>
+                  </Button>
+                </RoleBased>
               </div>
             </div>
             {students.length > 0 ? (
@@ -432,8 +447,8 @@ export default function PeoplePage() {
               <button
                 onClick={() => setActiveTab("code")}
                 className={`flex items-center gap-2 px-4 py-2 ${activeTab === "code"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-muted-foreground"
+                  ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                  : "text-muted-foreground"
                   }`}
               >
                 <QrCode className="h-4 w-4" />
@@ -442,8 +457,8 @@ export default function PeoplePage() {
               <button
                 onClick={() => setActiveTab("email")}
                 className={`flex items-center gap-2 px-4 py-2 ${activeTab === "email"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-muted-foreground"
+                  ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                  : "text-muted-foreground"
                   }`}
               >
                 <Mail className="h-4 w-4" />

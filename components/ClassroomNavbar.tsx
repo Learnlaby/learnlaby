@@ -13,6 +13,7 @@ import {
   CLASSROOM_ANALYTICS_PAGE,
   CLASSROOM_MEMBER_API
 } from "@/lib/api_routes"
+import RoleBased from "@/app/components/RoleBased"
 
 interface ClassroomMember {
   id: string;
@@ -52,10 +53,10 @@ const ClassroomNavbar = () => {
 
         const data = await response.json()
         const members: ClassroomMember[] = data.members
-        
+
         const currentUserEmail = session.user.email
         const currentMember = members.find(member => member.email === currentUserEmail)
-        
+
         if (currentMember) {
           setUserRole(currentMember.role)
         } else {
@@ -76,7 +77,6 @@ const ClassroomNavbar = () => {
   if (loading) return <div className="border-b w-full py-4 px-6">Loading classroom navigation...</div>
 
   const isActive = (link: string) => pathname === link ? "text-purple-600 font-semibold" : "text-muted-foreground"
-  // const isTeacher = userRole === "teacher" || userRole === "co-teacher"
 
   return (
     <div className="border-b w-full">
@@ -102,25 +102,23 @@ const ClassroomNavbar = () => {
           <Users className="w-4 h-4" />
           <span>People</span>
         </Link>
-{/*         
-        {isTeacher && (
-          <> */}
-            <Link
-              href={getRoute(CLASSROOM_GRADE_PAGE)}
-              className={`flex items-center gap-2 ${isActive(getRoute(CLASSROOM_GRADE_PAGE))}`}
-            >
-              <GradeIcon className="w-4 h-4" />
-              <span>Grade</span>
-            </Link>
-            <Link
-              href={getRoute(CLASSROOM_ANALYTICS_PAGE)}
-              className={`flex items-center gap-2 ${isActive(getRoute(CLASSROOM_ANALYTICS_PAGE))}`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Analytics</span>
-            </Link>
-          {/* </>
-        )} */}
+
+        <RoleBased allowedRoles={["teacher", "co-teacher"]} userRole={userRole}>
+          <Link
+            href={getRoute(CLASSROOM_GRADE_PAGE)}
+            className={`flex items-center gap-2 ${isActive(getRoute(CLASSROOM_GRADE_PAGE))}`}
+          >
+            <GradeIcon className="w-4 h-4" />
+            <span>Grade</span>
+          </Link>
+          <Link
+            href={getRoute(CLASSROOM_ANALYTICS_PAGE)}
+            className={`flex items-center gap-2 ${isActive(getRoute(CLASSROOM_ANALYTICS_PAGE))}`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Analytics</span>
+          </Link>
+        </RoleBased>
       </nav>
     </div>
   )
