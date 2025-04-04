@@ -16,6 +16,11 @@ export const CLASSROOM_JOIN_API = "/api/classroom/join";
 export const CLASSROOM_DEFAULT_IMAGE = "https://placehold.co/10x10";
 export const CLASSROOM_MEMBER_API = "/api/classroom/member";
 
+// Classroom Invitation
+export const GET_INVITATION = "/api/classroom/invitation/get";
+export const SEND_INVITATION = "/api/classroom/invitation/send";
+export const RESPONSE_INVITATION = "/api/classroom/invitation/response";
+
 // Classroom pages
 export const CLASSROOM_STREAM_PAGE = "/classroom/[id]/stream";
 export const CLASSROOM_CLASSWORK_PAGE = "/classroom/[id]/classwork";
