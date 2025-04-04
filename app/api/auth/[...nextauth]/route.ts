@@ -1,6 +1,6 @@
 import GoogleProvider from 'next-auth/providers/google';
 import NextAuth, { AuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
+import { default as CredentialsProvider } from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
 import { PrismaAdapter } from '@auth/prisma-adapter'

@@ -8,6 +8,8 @@ import { testApiHandler } from './api-test-utils'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 
 jest.mock('@aws-sdk/client-s3')
+jest.mock('next-auth');
+jest.mock('next-auth/providers/credentials');
 
 describe('Assignment Creation', () => {
   it('creates assignment with files', async () => {
@@ -52,7 +54,8 @@ describe('Assignment Creation', () => {
     const body = Readable.from(encoder.encode()) // readable stream
 
     await testApiHandler({
-      handler: require('@/app/api/classroom/posts/assignment/submission/route').POST,
+      // handler: require('@/app/api/classroom/posts/assignment/submission/route').POST,
+      handler: require('@/app/api/classroom/posts/assignment/submission/route.ts').POST,
       test: async ({ fetch }) => {
         const res = await fetch({ 
           method: 'POST',
