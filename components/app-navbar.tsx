@@ -34,7 +34,7 @@ const AppNavbar = () => {
 
     const creatClassroomAPI = "/api/classroom/create";
     const joinClassroomAPI = "/api/classroom/join";
-    const signinAPI = "http://localhost:3000/";
+    const signinPage = "http://localhost:3000/";
     const defaultProfileImage = "/default-profile.png";
 
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -171,7 +171,7 @@ const AppNavbar = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
             await signOut({ redirect: false })
-            router.replace(signinAPI)
+            router.replace(signinPage)
         }
     };
 

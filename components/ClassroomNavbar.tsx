@@ -20,11 +20,11 @@ const ClassroomNavbar = () => {
   const { data: session } = useSession()
   const [userRole, setUserRole] = useState<string>("")
   const [loading, setLoading] = useState<boolean>(true)
-  const classroomStreamAPI = "/classroom/${id}/stream";
-  const classroomClassworkAPI = "/classroom/${id}/classwork";
-  const classroomMemberAPI = "/classroom/${id}/member";
-  const classroomGradeAPI = "/classroom/${id}/grade";
-  const classroomAnalyticsAPI = "/classroom/${id}/analytics";
+  const classroomStreamPage = "/classroom/${id}/stream";
+  const classroomClassworkPage = "/classroom/${id}/classwork";
+  const classroomMemberPage = "/classroom/${id}/member";
+  const classroomGradePage = "/classroom/${id}/grade";
+  const classroomAnalyticsPage = "/classroom/${id}/analytics";
   const memberAPI = "/api/classroom/member";
 
   useEffect(() => {
@@ -78,22 +78,22 @@ const ClassroomNavbar = () => {
     <div className="border-b w-full" style={{ width: "100%" }}>
       <nav className="flex w-full items-center gap-6 px-6 py-4">
         <Link
-          href={classroomStreamAPI}
-          className={`flex items-center gap-2 ${isActive(classroomStreamAPI)}`}
+          href={classroomStreamPage}
+          className={`flex items-center gap-2 ${isActive(classroomStreamPage)}`}
         >
           <BookOpen className="w-4 h-4" />
           <span>Stream</span>
         </Link>
         <Link
-          href={classroomClassworkAPI}
-          className={`flex items-center gap-2 ${isActive(classroomClassworkAPI)}`}
+          href={classroomClassworkPage}
+          className={`flex items-center gap-2 ${isActive(classroomClassworkPage)}`}
         >
           <ClipboardList className="w-4 h-4" />
           <span>Classwork</span>
         </Link>
         <Link
-          href={classroomMemberAPI}
-          className={`flex items-center gap-2 ${isActive(classroomMemberAPI)}`}
+          href={classroomMemberPage}
+          className={`flex items-center gap-2 ${isActive(classroomMemberPage)}`}
         >
           <Users className="w-4 h-4" />
           <span>People</span>
@@ -102,15 +102,15 @@ const ClassroomNavbar = () => {
         {isTeacher && (
           <>
             <Link
-              href={classroomGradeAPI}
-              className={`flex items-center gap-2 ${isActive(classroomGradeAPI)}`}
+              href={classroomGradePage}
+              className={`flex items-center gap-2 ${isActive(classroomGradePage)}`}
             >
               <GradeIcon className="w-4 h-4" />
               <span>Grade</span>
             </Link>
             <Link
-              href={classroomAnalyticsAPI}
-              className={`flex items-center gap-2 ${isActive(classroomAnalyticsAPI)}`}
+              href={classroomAnalyticsPage}
+              className={`flex items-center gap-2 ${isActive(classroomAnalyticsPage)}`}
             >
               <BarChart3 className="w-4 h-4" />
               <span>Analytics</span>

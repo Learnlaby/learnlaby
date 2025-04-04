@@ -89,9 +89,9 @@ export default function Classwork() {
   const classworkAPI = "/api/classroom/posts/classworks";
   const commentAPI = "/api/classroom/comment";
   const createSectionAPI = "/api/classroom/posts/section/create";
-  const classworkCreateAPI = "/classroom/[classroomId]/classwork/create";
-  const classworkReviewAPI = "/classroom/[classroomId]/classwork/review/[postId]";
-  const classworkDetailAPI = "/classroom/[classroomId]/classwork/detail/[postId]";
+  const classworkCreatePage = "/classroom/[classroomId]/classwork/create";
+  const classworkReviewPage = "/classroom/[classroomId]/classwork/review/[postId]";
+  const classworkDetailPage = "/classroom/[classroomId]/classwork/detail/[postId]";
 
 
   useEffect(() => {
@@ -331,10 +331,10 @@ export default function Classwork() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setShowSectionDialog(true)}>New Section</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(classworkCreateAPI.replace("[classroomId]", classroomId) + "?type=Assignment")}>
+                <DropdownMenuItem onClick={() => router.push(classworkCreatePage.replace("[classroomId]", classroomId) + "?type=Assignment")}>
                   Assignment
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(classworkCreateAPI.replace("[classroomId]", classroomId) + "?type=Material")}>
+                <DropdownMenuItem onClick={() => router.push(classworkCreatePage.replace("[classroomId]", classroomId) + "?type=Material")}>
                   Material
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -383,7 +383,7 @@ export default function Classwork() {
                         <div>
                           <CardTitle
                             className="text-base font-medium cursor-pointer"
-                            onClick={() => router.push(classworkDetailAPI.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
+                            onClick={() => router.push(classworkDetailPage.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
                           >
                             {post.title}
                           </CardTitle>
@@ -403,7 +403,7 @@ export default function Classwork() {
                         <Button
                           variant="outline"
                           className="text-purple-600 border-purple-600 hover:bg-purple-50 ml-4 whitespace-nowrap"
-                          onClick={() => router.push(classworkReviewAPI.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
+                          onClick={() => router.push(classworkReviewPage.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
                         >
                           Review Work
                         </Button>

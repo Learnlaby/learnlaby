@@ -30,7 +30,7 @@ export default function CreateClasswork() {
   const sectionAPI = "/api/classroom/posts/section";
   const createAssimentAPI = "/api/classroom/posts/assignment/create";
   const createMaterialAPI = "/api/classroom/posts/material/create";
-  const classworkAPI = "/classroom/[classroomId]/classwork";
+  const classworkPage = "/classroom/[classroomId]/classwork";
 
   useEffect(() => {
     async function fetchTopics() {
@@ -101,7 +101,7 @@ export default function CreateClasswork() {
         throw new Error(`Failed to create ${type.toLowerCase()}.`);
       }
 
-      router.push(classworkAPI.replace("[classroomId]", classroomId));
+      router.push(classworkPage.replace("[classroomId]", classroomId));
     } catch (error) {
       console.error(`Error creating ${type.toLowerCase()}:`, error);
       alert(`Error creating ${type.toLowerCase()}.`);
@@ -116,7 +116,7 @@ export default function CreateClasswork() {
         <div className="flex items-center text-black-600 space-x-4">
           <Button
             className="text-purple-600 bg-transparent hover:bg-gray-200 px-2 py-1 rounded-md"
-            onClick={() => router.push(classworkAPI.replace("[classroomId]", classroomId))}
+            onClick={() => router.push(classworkPage.replace("[classroomId]", classroomId))}
           >
             ← Back
           </Button>
