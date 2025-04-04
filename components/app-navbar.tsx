@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import styles from './index.module.css';
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { GET_INVITATION, RESPONSE_INVITATION } from "@/lib/api_routes";
 
 // the timeslot type
 type TimeSlot = {
@@ -24,6 +25,8 @@ const AppNavbar = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [classCode, setClassCode] = useState("");
+    const [invitations, setInvitations] = useState<any[]>([]);
+    const [loadingInvites, setLoadingInvites] = useState(false);
     const [classroomData, setClassroomData] = useState({
         name: "",
         image: "",
@@ -66,7 +69,45 @@ const AppNavbar = () => {
         });
         setTimeSlots([]);
     };
-    const openJoinModal = () => { setShowJoinModal(true); closePopup(); };
+    const openJoinModal = async () => {
+        setShowJoinModal(true);
+        closePopup();
+        setLoadingInvites(true);
+        try {
+            const res = await fetch(GET_INVITATION);
+            if (res.ok) {
+                const data = await res.json();
+                setInvitations(data.invitations || []);
+            } else {
+                console.error("Failed to load invitations");
+            }
+        } catch (error) {
+            console.error("Error loading invitations", error);
+        } finally {
+            setLoadingInvites(false);
+        }
+    };
+
+    const handleInvitationResponse = async (invitationId: string, action: "accept" | "decline") => {
+        try {
+            const res = await fetch(RESPONSE_INVITATION, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ invitationId, action }),
+            });
+
+            if (res.ok) {
+                setInvitations((prev) => prev.filter((inv) => inv.id !== invitationId));
+                alert(`Invitation ${action}ed successfully!`);
+            } else {
+                alert("Failed to process invitation");
+            }
+        } catch (error) {
+            console.error("Invitation response error:", error);
+            alert("Something went wrong.");
+        }
+    };
+
     const closeJoinModal = () => { setShowJoinModal(false); };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -414,6 +455,47 @@ const AppNavbar = () => {
                         <h2 className="text-2xl font-semibold mb-4">Join Classroom</h2>
 
                         <label className="block mb-2">Enter Class Code</label>
+
+                        {loadingInvites ? (
+                            <p className="text-sm text-muted-foreground mb-4">Loading invitations...</p>
+                        ) : invitations.length > 0 && (
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold mb-3">Your Invitations</h3>
+                                <ul className="space-y-4 max-h-[200px] overflow-y-auto pr-1">
+                                    {invitations.map((invitation) => (
+                                        <li key={invitation.id} className="border rounded-lg p-3">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <div className="text-sm font-medium">
+                                                    {invitation.classroom.name}
+                                                    <span className="ml-2 text-xs text-purple-600">({invitation.role})</span>
+                                                </div>
+                                                <span className="text-xs text-muted-foreground">
+                                                    From: {invitation.sender.name} ({invitation.sender.email})
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {new Date(invitation.classroom.startDate).toLocaleDateString()} - {new Date(invitation.classroom.endDate).toLocaleDateString()}
+                                            </p>
+                                            <div className="mt-2 flex gap-2">
+                                                <button
+                                                    onClick={() => handleInvitationResponse(invitation.id, "accept")}
+                                                    className="px-2 py-1 bg-green-600 text-white text-xs rounded-md hover:bg-green-700"
+                                                >
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleInvitationResponse(invitation.id, "decline")}
+                                                    className="px-2 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600"
+                                                >
+                                                    Decline
+                                                </button>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
                         <input
                             type="text"
                             value={classCode}
@@ -436,6 +518,7 @@ const AppNavbar = () => {
                                 Join
                             </button>
                         </div>
+
                     </div>
                 </div>
             )}

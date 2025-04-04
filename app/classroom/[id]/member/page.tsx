@@ -28,6 +28,7 @@ import {
   CLASSROOM_MEMBER_API,
   CLASSROOM_BY_ID_API,
   AVATAR_IMAGE,
+  SEND_INVITATION,
 } from "@/lib/api_routes";
 
 type InvitePerson = {
@@ -216,37 +217,54 @@ export default function PeoplePage() {
 
     setIsInviting(true);
 
-    // Mock API call - in a real app, this would send the invites
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Filter out blank emails
+    const peopleToInvite = invitePeople.filter(
+      (person) => person.email.trim() !== ""
+    );
 
-    if (activeTab === "code") {
+    try {
+      const response = await fetch(SEND_INVITATION, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          classroomId,
+          invitations: peopleToInvite.map(({ email, role }) => ({
+            email,
+            role,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send invitations");
+      }
+
+      const data = await response.json();
+      const invited = data.result.filter((r: any) => r.message === "Invitation sent");
+      const skipped = data.result.filter((r: any) => r.message !== "Invitation sent");
+
       setNotification({
-        title: "Classroom code created!",
-        message: "Students can now join using this code",
+        title: "Invitations Processed",
+        message: `${invited.length} sent, ${skipped.length} skipped`,
         type: "success",
         visible: true,
       });
-    } else {
-      // Filter out empty emails
-      const peopleToInvite = invitePeople.filter(
-        (person) => person.email.trim() !== ""
-      );
 
+      // Optional: show individual messages per invite
+      console.table(data.result);
+
+    } catch (err) {
       setNotification({
-        title: "Invites sent!",
-        message: `Sent invitations to ${peopleToInvite.length} people`,
-        type: "success",
+        title: "Error",
+        message: "Failed to send invitations",
+        type: "error",
         visible: true,
       });
-
-      // Auto-hide notification after 2 seconds
-      setTimeout(() => {
-        setNotification(null);
-      }, 2000);
+      console.error(err);
+    } finally {
+      setIsInviting(false);
+      setIsInviteDialogOpen(false);
     }
-
-    setIsInviting(false);
-    setIsInviteDialogOpen(false);
   };
 
   const copyToClipboard = (text: string) => {
@@ -289,11 +307,10 @@ export default function PeoplePage() {
     <>
       {notification && notification.visible && (
         <Alert
-          className={`fixed top-4 right-4 w-96 z-50 ${
-            notification.type === "success"
+          className={`fixed top-4 right-4 w-96 z-50 ${notification.type === "success"
               ? "bg-green-50 border-green-200"
               : "bg-red-50 border-red-200"
-          }`}
+            }`}
         >
           <AlertTitle className="flex justify-between">
             {notification.title}
@@ -414,22 +431,20 @@ export default function PeoplePage() {
             <div className="flex border-b mb-6">
               <button
                 onClick={() => setActiveTab("code")}
-                className={`flex items-center gap-2 px-4 py-2 ${
-                  activeTab === "code"
+                className={`flex items-center gap-2 px-4 py-2 ${activeTab === "code"
                     ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
                     : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 <QrCode className="h-4 w-4" />
                 <span>Classroom Code</span>
               </button>
               <button
                 onClick={() => setActiveTab("email")}
-                className={`flex items-center gap-2 px-4 py-2 ${
-                  activeTab === "email"
+                className={`flex items-center gap-2 px-4 py-2 ${activeTab === "email"
                     ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
                     : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 <Mail className="h-4 w-4" />
                 <span>Email</span>
