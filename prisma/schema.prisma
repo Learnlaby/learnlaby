@@ -26,7 +26,6 @@ model User {
   posts            Post[]
   comments         Comment[]
   submissions      Submission[]
-  studentProgress  StudentProgress[]
   grades           Grade[]
 }
 
@@ -62,7 +61,6 @@ model Classroom {
   owner           User              @relation("ClassroomOwner", fields: [ownerId], references: [id])
   posts           Post[]
   members         ClassroomMember[]
-  studentProgress StudentProgress[]
   sections        Section[]
   timeSlots       TimeSlot[]        @relation("ClassroomTimeSlots")
 }
@@ -86,18 +84,6 @@ model ClassroomMember {
 
   classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model StudentProgress {
-  id                   String   @id @default(cuid())
-  studentId            String
-  classroomId          String
-  assignmentsCompleted Int
-  totalScore           Decimal  @db.Decimal(5, 2)
-  lastUpdated          DateTime @updatedAt
-
-  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
 }
 
 model Post {
