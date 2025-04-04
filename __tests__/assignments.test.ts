@@ -52,7 +52,7 @@ describe('Assignment Creation', () => {
     const body = Readable.from(encoder.encode()) // readable stream
 
     await testApiHandler({
-      handler: require('@/app/api/assignments/route').POST,
+      handler: require('@/app/api/classroom/posts/assignment/submission/route').POST,
       test: async ({ fetch }) => {
         const res = await fetch({ 
           method: 'POST',

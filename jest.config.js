@@ -1,27 +1,3 @@
-// module.exports = {
-//     preset: 'ts-jest',
-//     testEnvironment: 'node',
-//     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-//     moduleNameMapper: {
-//       '^@/(.*)$': '<rootDir>/src/$1',
-//       '^next-auth/providers/credentials$': '<rootDir>/__mocks__/next-auth.ts'
-//     }
-//   }
-
-// // jest.config.ts
-// export default {
-//     preset: 'ts-jest',
-//     testEnvironment: 'node',
-//     moduleFileExtensions: ['ts', 'js', 'json'],
-//     testMatch: ['**/__tests__/**/*.test.ts'],
-//     moduleNameMapper: {
-//       '^@/(.*)$': '<rootDir>/$1', // to support your @/app/api path aliases
-//     },
-//     transform: {
-//       '^.+\\.ts$': 'ts-jest',
-//     },
-//   }
-  
 const nextJest = require('next/jest')
 
 const createJestConfig = nextJest({
@@ -30,10 +6,20 @@ const createJestConfig = nextJest({
 })
 
 const customJestConfig = {
+  preset: 'ts-jest',
   setupFilesAfterEnv: ['./jest.setup.js'],
   moduleNameMapper: {
     // Handle module aliases
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/app/$1',
+    // '^@/app/(.*)$': '<rootDir>/src/app/$1',
+    // '^@/public/(.*)$': '<rootDir>/public/$1',
+    // '^@/styles/(.*)$': '<rootDir>/src/styles/$1',
+    // '^@/(.*)$': './app/$1',
+    '^next-auth/providers/credentials$': '<rootDir>/__mocks__/next-auth.ts',
+    '^@/components/(.*)$': '<rootDir>/src/components/$1',
+    '^@/utils/(.*)$': '<rootDir>/src/utils/$1',  
+    '\\.(css|less|sass|scss)$': '<rootDir>/__mocks__/styleMock.js',
+    '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js'
   },
   testEnvironment: 'node',
   transform: {
