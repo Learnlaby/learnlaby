@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* Assignment Difficulty Ranking */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-lg">Assignment Difficulty Ranking</CardTitle>
           <CardDescription>Assignments from hardest to easiest</CardDescription>
@@ -320,6 +320,40 @@ export default function AnalyticsPage() {
               <Tooltip />
               <Bar dataKey="avgScore" fill={COLORS.red} radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="avgScore" position="top" fontSize={12} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card> */}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Most Missing Assignments</CardTitle>
+          <CardDescription>Assignments with highest number of missing submissions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart 
+              data={(() => {
+                // Calculate missing submissions for each assignment
+                return assignments.map(assignment => {
+                  const missingCount = students.length - assignment.submissions.length;
+                  return {
+                    name: assignment.title,
+                    missingCount: missingCount
+                  };
+                })
+                // Sort by most missing submissions first
+                .sort((a, b) => b.missingCount - a.missingCount)
+                // Take top 5
+                .slice(0, 5);
+              })()}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} />
+              <Tooltip />
+              <Bar dataKey="missingCount" fill={COLORS.red} radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="missingCount" position="top" fontSize={12} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
