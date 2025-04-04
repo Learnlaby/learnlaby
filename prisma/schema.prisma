@@ -27,6 +27,7 @@ model User {
   comments         Comment[]
   submissions      Submission[]
   grades           Grade[]
+  sentInvitations  Invitation[] @relation("InvitationSender")
 }
 
 model Account {
@@ -63,6 +64,7 @@ model Classroom {
   members         ClassroomMember[]
   sections        Section[]
   timeSlots       TimeSlot[]        @relation("ClassroomTimeSlots")
+  invitations     Invitation[]
 }
 
 model TimeSlot {
@@ -159,4 +161,19 @@ model Section {
 
   classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   posts     Post[]
+}
+
+model Invitation {
+  id            String   @id @default(cuid())
+  senderId      String
+  receiverEmail String   @db.VarChar(255)
+  classroomId   String
+  role          String   @default("student") @db.VarChar(20) // student, co-teacher, teacher
+  createdAt     DateTime @default(now())
+
+  sender    User      @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([receiverEmail])
+  @@index([classroomId])
 }
