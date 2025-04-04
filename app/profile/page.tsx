@@ -3,7 +3,6 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { SIGNIN_PAGE } from '@/lib/api_routes'
 
 type SessionUser = {
   name?: string
@@ -16,7 +15,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push(SIGNIN_PAGE)
+      router.push('/')
     }
   }, [status, router])
 
@@ -32,7 +31,7 @@ export default function Profile() {
         </p>
         <p>Email: {user.email}</p>
         <button
-          onClick={() => signOut({ callbackUrl: SIGNIN_PAGE })}
+          onClick={() => signOut({ callbackUrl: '/' })}
           className="w-full bg-blue-500 text-white py-2 rounded"
         >
           Logout

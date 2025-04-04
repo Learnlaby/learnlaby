@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 // GET a specific classroom by ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-    const { id } = await params; // Extract classroom ID from URL
+    const { id } = params; // Extract classroom ID from URL
 
     try {
         const classroom = await prisma.classroom.findUnique({

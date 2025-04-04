@@ -1,29 +1,25 @@
 import { PrismaClient } from "@prisma/client";
-import { getServerSession } from 'next-auth/next';
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from "../../auth/[...nextauth]/route";
+
 
 const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
-    const session = await getServerSession(authOptions);
-
+    const session = await getServerSession(authOptions)
+    
     try {
-        const body = await request.json();
+        const bodyText = await request.text();
+        const { 
+            name, 
+            description = "", 
+            image = "", 
+            ownerId = session && session.user ? (session.user as { id: string }).id : null 
+        } = JSON.parse(bodyText);
 
-        const {
-            name,
-            description = "",
-            image = "",
-            startDate,
-            endDate,
-            timeSlots = []
-        } = body;
-
-        const ownerId = session?.user ? (session.user as { id: string }).id : null;
-
-        if (!name || !startDate || !endDate || timeSlots.length === 0) {
+        if (!name) {
             return new Response(
-                JSON.stringify({ error: "Missing required fields: name, startDate, endDate, or timeSlots." }),
+                JSON.stringify({ error: "Classroom name is required" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
@@ -33,30 +29,17 @@ export async function POST(request: Request) {
                 name,
                 description,
                 image,
-                ownerId,
-                startDate: new Date(startDate),
-                endDate: new Date(endDate),
+                ownerId
             },
         });
 
         await prisma.classroomMember.create({
             data: {
                 classroomId: classroom.id,
-                userId: ownerId!,
+                userId: ownerId,
                 role: "teacher",
             },
         });
-
-        for (const slot of timeSlots) {
-            await prisma.timeSlot.create({
-                data: {
-                    classroomId: classroom.id,
-                    day: slot.day,
-                    startTime: slot.startTime,
-                    endTime: slot.endTime,
-                },
-            });
-        }
 
         return new Response(JSON.stringify(classroom), {
             status: 201,

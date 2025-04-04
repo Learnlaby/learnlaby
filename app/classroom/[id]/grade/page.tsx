@@ -6,69 +6,42 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown } from "lucide-react"
-import { useParams } from "next/navigation"
-import { SUBMISSION_ASSIGNMENT_API, PLACEHOLDER_IMAGE } from "@/lib/api_routes"
+
+// Sample data structure
+const assignments = [
+  { id: "A", name: "Assignment A", maxScore: 100 },
+  { id: "B", name: "Assignment B", maxScore: 100 },
+  { id: "C", name: "Assignment C", maxScore: 100 },
+  { id: "D", name: "Assignment D", maxScore: 100 },
+  { id: "E", name: "Assignment E", maxScore: 100 },
+]
+
+const students = [
+  { id: 1, name: "Lorem Ipsum A", avatar: "/placeholder.svg" },
+  { id: 2, name: "Lorem Ipsum B", avatar: "/placeholder.svg" },
+  { id: 3, name: "Lorem Ipsum C", avatar: "/placeholder.svg" },
+  { id: 4, name: "Lorem Ipsum D", avatar: "/placeholder.svg" },
+  { id: 5, name: "Lorem Ipsum E", avatar: "/placeholder.svg" },
+  { id: 6, name: "Lorem Ipsum F", avatar: "/placeholder.svg" },
+  { id: 7, name: "Lorem Ipsum G", avatar: "/placeholder.svg" },
+  { id: 8, name: "Lorem Ipsum H", avatar: "/placeholder.svg" },
+]
+
+// Generate random scores for demo
+const generateScores = () => {
+  const scores: { [key: string]: { [key: string]: number } } = {}
+  students.forEach((student) => {
+    scores[student.id] = {}
+    assignments.forEach((assignment) => {
+      scores[student.id][assignment.id] = -1 // -1 represents ungraded
+    })
+  })
+  return scores
+}
 
 export default function GradePage() {
-  const { id: classroomId } = useParams()
-  const [assignments, setAssignments] = React.useState<any[]>([])
-  const [students, setStudents] = React.useState<any[]>([])
-  const [scores, setScores] = React.useState<{ [assignmentId: string]: { [studentId: string]: number | null } }>({})
+  const [scores, setScores] = React.useState(generateScores())
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc")
-
-  React.useEffect(() => {
-    if (!classroomId) return
-
-    const fetchData = async () => {
-      const res = await fetch(SUBMISSION_ASSIGNMENT_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classroomId }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        const assignmentList = data.assignments || []
-        const memberList = data.students || []
-
-        const scoreMap: { [assignmentId: string]: { [studentId: string]: number | null } } = {}
-
-        assignmentList.forEach((assignment: any) => {
-          const assignmentId = assignment.id
-          scoreMap[assignmentId] = {}
-
-          memberList.forEach((student: any) => {
-            const studentId = student.id
-            const submission = assignment.submissions.find(
-              (s: any) => s.studentId === studentId
-            )
-
-            if (submission) {
-              if (submission.grade) {
-                scoreMap[assignmentId][studentId] = submission.grade.score
-              } else {
-                scoreMap[assignmentId][studentId] = -1 // Turned in but not graded
-              }
-            } else {
-              scoreMap[assignmentId][studentId] = null // Not submitted
-            }
-          })
-        })
-
-        const formattedMembers = memberList.map((m: any) => ({
-          id: m.id,
-          name: m.name || "Unnamed",
-          avatar: m.image || PLACEHOLDER_IMAGE,
-        }))
-
-        setAssignments(assignmentList)
-        setStudents(formattedMembers)
-        setScores(scoreMap)
-      }
-    }
-
-    fetchData()
-  }, [classroomId])
 
   const handleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
@@ -81,26 +54,18 @@ export default function GradePage() {
       }
       return b.name.localeCompare(a.name)
     })
-  }, [students, sortOrder])
+  }, [sortOrder])
 
-  const calculateClassAverage = (assignmentId: string, maxScore?: number) => {
-    const studentScores = scores[assignmentId]
-  
-    if (!maxScore) return "-" // Ungraded assignment
-  
-    if (!studentScores) return "0.0" // No submissions at all
-  
-    const validScores = Object.values(studentScores).filter(
-      (score) => score !== null && score !== -1
-    ) as number[]
-  
-    if (validScores.length === 0) return "0.0" // Graded assignment but no valid scores
-  
+  const calculateClassAverage = (assignmentId: string) => {
+    const validScores = Object.values(scores)
+      .map((studentScores) => studentScores[assignmentId])
+      .filter((score) => score !== -1)
+
+    if (validScores.length === 0) return "-"
+
     const average = validScores.reduce((sum, score) => sum + score, 0) / validScores.length
     return average.toFixed(1)
   }
-   
-  
 
   return (
     <div className="container mx-auto py-6">
@@ -125,10 +90,8 @@ export default function GradePage() {
               </TableHead>
               {assignments.map((assignment) => (
                 <TableHead key={assignment.id} className="text-center">
-                  <div className="font-medium">{assignment.title}</div>
-                  <div className="text-muted-foreground text-sm">
-                    {assignment.maxScore ? `Out of ${assignment.maxScore}` : "Ungraded"}
-                  </div>
+                  <div className="font-medium">{assignment.name}</div>
+                  <div className="text-muted-foreground text-sm">Out of {assignment.maxScore}</div>
                 </TableHead>
               ))}
             </TableRow>
@@ -138,7 +101,7 @@ export default function GradePage() {
               <TableCell className="font-medium">Class Average</TableCell>
               {assignments.map((assignment) => (
                 <TableCell key={assignment.id} className="text-center">
-                  {calculateClassAverage(assignment.id, assignment.maxScore)}
+                  {calculateClassAverage(assignment.id)}
                 </TableCell>
               ))}
             </TableRow>
@@ -155,23 +118,9 @@ export default function GradePage() {
                 </TableCell>
                 {assignments.map((assignment) => (
                   <TableCell key={assignment.id} className="text-center">
-                    {(() => {
-                      const score = scores[assignment.id]?.[student.id];
-
-                      if (!assignment.maxScore) {
-                        return score !== null && score !== undefined ? "Submitted" : "Not submitted";
-                      }
-
-                      if (score === null || score === undefined) {
-                        return "Not submitted";
-                      }
-
-                      if (score === -1) {
-                        return `Turned in`;
-                      }
-
-                      return `${score} / ${assignment.maxScore}`;
-                    })()}
+                    {scores[student.id][assignment.id] === -1
+                      ? "__ / 100"
+                      : `${scores[student.id][assignment.id]} / 100`}
                   </TableCell>
                 ))}
               </TableRow>
@@ -182,3 +131,4 @@ export default function GradePage() {
     </div>
   )
 }
+
