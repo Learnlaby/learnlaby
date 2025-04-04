@@ -188,7 +188,8 @@ export default function AnalyticsPage() {
                   labelLine={false}
                   outerRadius={100}
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
+                  label={({ name, value }) => value > 0 ? `${name}: ${value}` : null}
+                  // label={({ name, value }) => `${name}: ${value}`}
                   stroke="none"
                 >
                   {(submissionStatusData[selectedAssignment] || []).map((entry, index) => (
