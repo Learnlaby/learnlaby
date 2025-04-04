@@ -1,10 +1,10 @@
 "use client";
 
 import Layout from "@/components/layout";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { CircularProgress } from "@mui/material"; // Optional: A loading spinner
+import { SIGNIN_PAGE } from "@/lib/api_routes";
 
 type SessionUser = {
   name?: string;
@@ -18,7 +18,7 @@ export default function Profile() {
   // Redirect user to home page if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push(SIGNIN_PAGE);
     }
   }, [status, router]);
 

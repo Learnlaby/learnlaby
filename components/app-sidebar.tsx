@@ -14,10 +14,16 @@ import {
 } from "@/components/ui/sidebar";
 import styles from './index.module.css';
 import Image from "next/image";
+import {
+  CLASSROOM_API,
+  CLASSROOM_DEFAULT_IMAGE,
+  CLASSROOM_STREAM_PAGE,
+  HOME_PAGE
+} from "@/lib/api_routes";
 
 // Menu items: Home, Calendar, Registered, To-Do List
 const items = [
-  { title: "Home", url: "/home", icon: FaHome },
+  { title: "Home", url: HOME_PAGE, icon: FaHome },
   { title: "Calendar", url: "/calendar", icon: FaCalendar },
   { title: "To Do List", url: "/to-do", icon: FaClipboardList },
 ];
@@ -38,7 +44,7 @@ export function AppSidebar() {
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        const response = await fetch("/api/classroom");
+        const response = await fetch(CLASSROOM_API);
         if (!response.ok) throw new Error("Failed to fetch classrooms");
 
         const data: Classroom[] = await response.json();
@@ -92,13 +98,16 @@ export function AppSidebar() {
                     className="flex items-center gap-3 p-0.5 rounded-lg"
                   >
                     <Image
-                        src={classroom.image || "https://placehold.co/10x10"}
-                        alt={classroom.name || "Classroom profile"}
-                        className="rounded-full w-7 h-7"
-                        width={80}
-                        height={80}
+                      src={classroom.image || CLASSROOM_DEFAULT_IMAGE}
+                      alt={classroom.name || "Classroom profile"}
+                      className="rounded-full w-7 h-7"
+                      width={80}
+                      height={80}
                     />
-                    <a href={`/classroom/${classroom.id}/stream`} className="textColor">
+                    <a 
+                      href={CLASSROOM_STREAM_PAGE.replace("[id]", classroom.id)} 
+                      className="textColor"
+                    >
                       {classroom.name}
                     </a>
                   </div>

@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { SUBMISSION_ASSIGNMENT_API, PLACEHOLDER_IMAGE } from "@/lib/api_routes";
 
 export default function AnalyticsPage() {
   const { id: classroomId } = useParams();
@@ -43,11 +44,19 @@ export default function AnalyticsPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
+  const COLORS = {
+    green: "#5CB338",
+    orange: "#FFA447",
+    red: "#FB4141",
+    purple: "#7E1891",
+    blue: "#2D82B7"
+  };
+
   useEffect(() => {
     if (!classroomId) return;
 
     const fetchData = async () => {
-      const res = await fetch("/api/classroom/posts/assignment/submission", {
+      const res = await fetch(SUBMISSION_ASSIGNMENT_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId }),
@@ -97,9 +106,9 @@ export default function AnalyticsPage() {
     });
 
     acc[assignment.title] = [
-      { name: "On Time", value: stats["On Time"], color: "#5CB338" },
-      { name: "Late", value: stats["Late"], color: "#FFA447" },
-      { name: "Not Submitted", value: stats["Not Submitted"], color: "#FB4141" },
+      { name: "On Time", value: stats["On Time"], color: COLORS.green },
+      { name: "Late", value: stats["Late"], color: COLORS.orange },
+      { name: "Not Submitted", value: stats["Not Submitted"], color: COLORS.red },
     ];
     return acc;
   }, {});
@@ -148,7 +157,7 @@ export default function AnalyticsPage() {
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
                 <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
                 <Tooltip />
-                <Bar dataKey="avgScore" fill="#7E1891" radius={8}>
+                <Bar dataKey="avgScore" fill={COLORS.purple} radius={[4, 4, 0, 0]}>
                   <LabelList dataKey="avgScore" position="top" offset={12} fontSize={12} />
                 </Bar>
               </BarChart>
@@ -222,7 +231,7 @@ export default function AnalyticsPage() {
               <XAxis dataKey="name" tickLine={false} axisLine={false} />
               <YAxis domain={[0, 100]} />
               <Tooltip />
-              <Line type="monotone" dataKey="avgScore" stroke="#7E1891" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="avgScore" stroke={COLORS.purple} strokeWidth={2} dot={{r: 4 }} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -269,7 +278,7 @@ export default function AnalyticsPage() {
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="range" tickLine={false} axisLine={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#2D82B7" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="count" fill={COLORS.blue} radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="count" position="top" fontSize={12} />
               </Bar>
             </BarChart>
@@ -289,7 +298,7 @@ export default function AnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tickLine={false} axisLine={false} />
               <Tooltip />
-              <Bar dataKey="avgScore" fill="#5CB338" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="avgScore" fill={COLORS.green} radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="avgScore" position="top" fontSize={12} />
               </Bar>
             </BarChart>
@@ -309,7 +318,7 @@ export default function AnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tickLine={false} axisLine={false} />
               <Tooltip />
-              <Bar dataKey="avgScore" fill="#FB4141" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="avgScore" fill={COLORS.red} radius={[4, 4, 0, 0]}>
                 <LabelList dataKey="avgScore" position="top" fontSize={12} />
               </Bar>
             </BarChart>
@@ -329,7 +338,7 @@ export default function AnalyticsPage() {
               <div key={student.email} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-4">
                   <Avatar className={`h-12 w-12 ${student.avatarColor}`}>
-                    <AvatarImage src={student.image || "/placeholder.svg"} />
+                    <AvatarImage src={student.image || PLACEHOLDER_IMAGE} alt={student.name} />
                     <AvatarFallback>{student.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <div className="grid gap-1">

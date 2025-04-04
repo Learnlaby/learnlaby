@@ -7,6 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Send } from 'lucide-react';
 
+import {
+  ANNOUNCEMENT_API,
+  COMMENT_ON_POST_API,
+  CLASSROOM_BY_ID_API,
+  POST_API,
+  DEFAULT_IMAGE,
+} from "@/lib/api_routes";
+
 interface Classroom {
   id: string;
   name: string;
@@ -59,7 +67,7 @@ const StreamPage = () => {
       if (!id) return;
 
       try {
-        const response = await fetch(`/api/classroom/${id}`);
+        const response = await fetch(CLASSROOM_BY_ID_API.replace("[id]", id));
         if (!response.ok) throw new Error("Failed to fetch classroom data");
 
         const data: Classroom = await response.json();
@@ -73,7 +81,7 @@ const StreamPage = () => {
       if (!id) return;
 
       try {
-        const response = await fetch("/api/classroom/posts", {
+        const response = await fetch(POST_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId: id }),
@@ -102,7 +110,7 @@ const StreamPage = () => {
 
   const fetchComments = async (postId: string): Promise<Comment[]> => {
     try {
-      const response = await fetch(`/api/classroom/comment?postId=${postId}`);
+      const response = await fetch(`${COMMENT_ON_POST_API}?postId=${postId}`);
       if (!response.ok) {
         console.error("Failed to fetch comments for post", postId);
         return [];
@@ -121,7 +129,7 @@ const StreamPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/classroom/posts/announcements", {
+      const response = await fetch(ANNOUNCEMENT_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +170,7 @@ const StreamPage = () => {
     }));
   
     try {
-      const response = await fetch("/api/classroom/comment", {
+      const response = await fetch(COMMENT_ON_POST_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -214,7 +222,7 @@ const StreamPage = () => {
       {/* Image Container */}
       <div className="relative w-full h-[30vh]">
         <Image
-          src={classroom.image || "https://placehold.co/800x400"}
+          src={classroom.image || DEFAULT_IMAGE}
           alt="Classroom Image"
           layout="fill"
           objectFit="cover"

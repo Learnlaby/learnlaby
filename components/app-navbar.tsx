@@ -32,6 +32,11 @@ const AppNavbar = () => {
         endDate: "",
     });
 
+    const creatClassroomAPI = "/api/classroom/create";
+    const joinClassroomAPI = "/api/classroom/join";
+    const signinPage = "http://localhost:3000/";
+    const defaultProfileImage = "/default-profile.png";
+
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
     const [currentTimeSlot, setCurrentTimeSlot] = useState<TimeSlot>({
         id: "",
@@ -110,10 +115,21 @@ const AppNavbar = () => {
             return;
         }
 
-        console.log(classroomData, timeSlots);
+        if (new Date(classroomData.startDate) >= new Date(classroomData.endDate)) {
+            alert("Start date must be before end date!");
+            return;
+        }
+        if (new Date(classroomData.startDate) < new Date()) {
+            alert("Start date must be in the future!");
+            return;
+        }
+        if (new Date(classroomData.endDate) < new Date()) {
+            alert("End date must be in the future!");
+            return;
+        }
 
         try {
-            const response = await fetch("/api/classroom/create", {
+            const response = await fetch(creatClassroomAPI, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...classroomData, timeSlots }),
@@ -136,7 +152,7 @@ const AppNavbar = () => {
         }
 
         try {
-            const response = await fetch("/api/classroom/join", {
+            const response = await fetch(joinClassroomAPI, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ classroomCode: classCode }),
@@ -155,7 +171,7 @@ const AppNavbar = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
             await signOut({ redirect: false })
-            router.replace("http://localhost:3000/")
+            router.replace(signinPage)
         }
     };
 
@@ -203,7 +219,7 @@ const AppNavbar = () => {
                             <button className="p-1 rounded-full hover:bg-gray-200">
                                 {session?.user && (
                                     <Image
-                                        src={session.user.image || "/default-profile.png"}
+                                        src={session.user.image || defaultProfileImage}
                                         alt={session.user.name || "User profile"}
                                         className="rounded-full w-8 h-8"
                                         width={80}

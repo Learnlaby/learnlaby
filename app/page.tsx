@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import styles from '@/components/index.module.css'
+import { HOME_PAGE } from '@/lib/api_routes'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -23,10 +24,10 @@ export default function SignIn() {
       if (result && result.error) {
         console.error(result.error)
       } else {
-        router.push('/home')
+        router.push(HOME_PAGE)
       }
     } catch (error) {
-      console.log('error', error)
+      console.error('Error signing in:', error)
     }
   }
 

@@ -3,7 +3,26 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, NotebookText, NotebookPen } from "lucide-react";
+import { NotebookText, NotebookPen, Send } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  POST_DETAIL_API,
+  SUBMISSION_GET_API,
+  COMMENT_API,
+  SUBMISSION_CREATE_API
+} from "@/lib/api_routes";
+
+// Add interface for Comment
+interface Comment {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name?: string;
+    image?: string;
+  };
+}
 
 export default function ClassworkDetailPage() {
   const { postId } = useParams();
@@ -12,6 +31,11 @@ export default function ClassworkDetailPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // State for comments
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentContent, setCommentContent] = useState<string>("");
+  const [submittingComment, setSubmittingComment] = useState<boolean>(false);
 
   // Fetch classwork detail
   useEffect(() => {
@@ -19,7 +43,7 @@ export default function ClassworkDetailPage() {
       if (!postId) return;
 
       try {
-        const response = await fetch(`/api/classroom/posts/detail`, {
+        const response = await fetch(POST_DETAIL_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ postId }),
@@ -44,7 +68,7 @@ export default function ClassworkDetailPage() {
     async function fetchSubmission() {
       if (!postId) return;
 
-      const res = await fetch("/api/classroom/submission/get", {
+      const res = await fetch(SUBMISSION_GET_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ postId }),
@@ -57,6 +81,27 @@ export default function ClassworkDetailPage() {
     }
 
     fetchSubmission();
+  }, [postId]);
+
+  // Fetch comments for the post
+  useEffect(() => {
+    async function fetchComments() {
+      if (!postId) return;
+
+      try {
+        const response = await fetch(`${COMMENT_API}?postId=${postId}`);
+        if (!response.ok) {
+          console.error("Failed to fetch comments for post", postId);
+          return;
+        }
+        const data = await response.json();
+        setComments(data);
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+      }
+    }
+
+    fetchComments();
   }, [postId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +119,7 @@ export default function ClassworkDetailPage() {
       formData.append("files", file);
     });
 
-    const response = await fetch("/api/classroom/submission/create", {
+    const response = await fetch(SUBMISSION_CREATE_API, {
       method: "POST",
       body: formData,
     });
@@ -85,6 +130,36 @@ export default function ClassworkDetailPage() {
       alert("Submission successful!");
     } else {
       alert("Submission failed.");
+    }
+  };
+
+  // Handle comment submission
+  const handleCommentSubmit = async () => {
+    if (!commentContent.trim() || !postId) return;
+
+    setSubmittingComment(true);
+
+    try {
+      const response = await fetch(COMMENT_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postId,
+          content: commentContent,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create comment");
+
+      const newComment: Comment = await response.json();
+      setComments(prev => [...prev, newComment]);
+      setCommentContent(""); // Clear input after successful submission
+    } catch (err) {
+      console.error("Error submitting comment:", err);
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -118,9 +193,7 @@ export default function ClassworkDetailPage() {
           </div>
         )}
 
-
         <p className="text-gray-800 mt-4 p-4 border rounded-lg shadow-lg">{classwork.content}</p>
-
 
         {classwork.files?.length > 0 && (
           <div className="mt-6">
@@ -149,13 +222,63 @@ export default function ClassworkDetailPage() {
         )}
 
         {/* Class Comments */}
-        <div className="mt-6 p-4 bg-gray-100 rounded-md shadow-md">
-          <p className="font-semibold">Class comments</p>
-          <input
-            type="text"
-            className="mt-2 p-2 w-full border rounded-md"
-            placeholder="Add a class comment"
-          />
+        <div className="mt-6 p-4 bg-white rounded-lg shadow-md">
+          <h4 className="font-semibold text-lg mb-4">Class comments</h4>
+          
+          <Separator className="mb-4" />
+          
+          {/* Display comments */}
+          <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
+            {comments && comments.length > 0 ? (
+              comments.map(comment => (
+                <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    {comment.user.image && (
+                      <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                        <img
+                          src={comment.user.image}
+                          alt={comment.user.name || "User"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-sm">{comment.user.name || "Anonymous"}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(comment.createdAt).toLocaleDateString()} {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm">{comment.content}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No comments yet.</p>
+            )}
+          </div>
+          
+          {/* Add new comment */}
+          <div className="flex items-center space-x-2">
+            <textarea
+              className="w-full h-10 border rounded-2xl bg-white placeholder:text-gray-400 pl-3 pt-2 text-sm"
+              placeholder="Add your comment"
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleCommentSubmit();
+                }
+              }}
+            />
+            <button
+              className="px-2 py-2 bg-white hover:bg-gray-100 rounded-full text-purple-500 disabled:text-gray-300"
+              onClick={handleCommentSubmit}
+              disabled={submittingComment || !commentContent?.trim()}
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -193,7 +316,7 @@ export default function ClassworkDetailPage() {
 
           {submission ? (
             <div className="mt-2 text-green-600 text-sm">
-              <p>✅ Submitted on {new Date(submission.submittedAt).toLocaleDateString()}</p>
+              <p>✅ Submitted on {new Date(submission.submittedAt).toLocaleDateString()} {new Date(submission.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
               {submission.files?.length > 0 && (
                 <div className="mt-4 space-y-2">
                   {submission.files.map((file: any) => {
@@ -201,7 +324,7 @@ export default function ClassworkDetailPage() {
                     return (
                       <div
                         key={file.id}
-                        className="flex justify-between items-center bg-gray-100 p-2 rounded-md text-sm border"
+                        className="flex justify-between items-center bg-gray-50 p-2 rounded-md text-sm border"
                       >
                         <a
                           href={file.url}

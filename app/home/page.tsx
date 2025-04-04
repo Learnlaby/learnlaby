@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import ClassroomCard from "@/components/ClassroomCard";
 import Layout from "@/components/layout";
+import {
+  CLASSROOM_API,
+  DEFAULT_CLASSWORK_IMAGE,
+} from "@/lib/api_routes";
 
 export default function Home() {
   interface Classroom {
@@ -16,10 +20,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        const response = await fetch("/api/classroom");
+        const response = await fetch(CLASSROOM_API);
         if (!response.ok) throw new Error("Failed to fetch classrooms");
         const data = await response.json();
         setClassrooms(data);
@@ -46,7 +51,7 @@ export default function Home() {
               id={classroom.id}
               name={classroom.name}
               description={classroom.description || "No description available"}
-              image={classroom.image || "https://placehold.co/216x160"}
+              image={classroom.image || DEFAULT_CLASSWORK_IMAGE}
             />
           ))
         }

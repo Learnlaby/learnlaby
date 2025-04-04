@@ -5,8 +5,12 @@ import { Files } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { set } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import {
+  SUBMISSION_API,
+  AVATAR_IMAGE,
+  getStudentReviewUrl,
+} from "@/lib/api_routes";
 
 export default function ReviewWork() {
   const { id, assignmentId } = useParams();
@@ -18,7 +22,7 @@ export default function ReviewWork() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/classroom/submission", {
+        const response = await fetch(SUBMISSION_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ postId: assignmentId }),
@@ -115,7 +119,7 @@ export default function ReviewWork() {
                   <div key={student.id} className="flex items-center justify-between p-2 border-b hover:bg-gray-100">
                     <div className="flex items-center">
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={student.image || "https://placekitten.com/100/100"} alt={student.name} />
+                        <AvatarImage src={student.image || AVATAR_IMAGE} alt={student.name} />
                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="ml-2 text-sm">{student.name}</div>
@@ -165,7 +169,14 @@ export default function ReviewWork() {
               .map((student) => (
                 <Link
                   key={student.id}
-                  href={`/classroom/${id}/classwork/review/${assignmentId}/${student.id}?name=${encodeURIComponent(student.name)}&status=${student.status}&docId=${student.docId}`}
+                  href={getStudentReviewUrl(
+                    id as string,
+                    assignmentId as string,
+                    student.id,
+                    student.name,
+                    student.status,
+                    student.docId
+                  )}
                   className="bg-white rounded shadow block"
                 >
                   <div className="p-3 border-b flex items-center">
@@ -174,7 +185,7 @@ export default function ReviewWork() {
                       style={{ backgroundColor: student.avatarColor }}
                     >
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={student.image || "https://placekitten.com/100/100"} alt={student.name} />
+                        <AvatarImage src={student.image || AVATAR_IMAGE} alt={student.name} />
                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                     </div>

@@ -24,6 +24,12 @@ import {
   Mail,
 } from "lucide-react";
 
+import {
+  CLASSROOM_MEMBER_API,
+  CLASSROOM_BY_ID_API,
+  AVATAR_IMAGE,
+} from "@/lib/api_routes";
+
 type InvitePerson = {
   email: string;
   role: "student" | "co-teacher" | "teacher";
@@ -86,7 +92,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch("/api/classroom/member", {
+        const response = await fetch(CLASSROOM_MEMBER_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -113,7 +119,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch("/api/classroom/" + classroomId, {
+        const response = await fetch(CLASSROOM_BY_ID_API.replace("[id]", classroomId), {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -313,7 +319,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={teacher.image || "https://placekitten.com/100/100"}
+                        src={teacher.image || AVATAR_IMAGE}
                         alt={teacher.name}
                       />
                       <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
@@ -364,7 +370,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={student.image || "https://placekitten.com/100/100"}
+                        src={student.image || AVATAR_IMAGE}
                         alt={student.name}
                       />
                       <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
