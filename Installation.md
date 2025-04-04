@@ -13,8 +13,6 @@
   - [Download and Install Git](https://git-scm.com/downloads)
 - **PostgreSQL / Neon / Vercel Postgres**  
   - [Neon](https://neon.tech/) or [Vercel Postgres](https://vercel.com/postgres)
-- **Optional: Yarn**  
-  - [Yarn Installation Guide](https://classic.yarnpkg.com/lang/en/docs/install/)
 
 ---
 
