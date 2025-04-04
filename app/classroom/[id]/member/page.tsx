@@ -24,6 +24,12 @@ import {
   Mail,
 } from "lucide-react";
 
+import {
+  CLASSROOM_MEMBER_API,
+  CLASSROOM_BY_ID_API,
+  AVATAR_IMAGE,
+} from "@/lib/api_routes";
+
 type InvitePerson = {
   email: string;
   role: "student" | "co-teacher" | "teacher";
@@ -70,10 +76,6 @@ export default function PeoplePage() {
   // classroom code
   const [classroomCode, setClassCode] = useState<string>("");
 
-  const memberAPI = "/api/classroom/member";
-  const classroomAPI = "/api/classroom/" + classroomId;
-  const avatarImage = "https://placekitten.com/100/100";
-
   // rewrite to Reset the invitation form when dialog closes; actual code
   useEffect(() => {
     if (!isInviteDialogOpen) {
@@ -90,7 +92,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch(memberAPI, {
+        const response = await fetch(CLASSROOM_MEMBER_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -117,7 +119,7 @@ export default function PeoplePage() {
       }
 
       try {
-        const response = await fetch(classroomAPI, {
+        const response = await fetch(CLASSROOM_BY_ID_API.replace("[id]", classroomId), {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -317,7 +319,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={teacher.image || avatarImage}
+                        src={teacher.image || AVATAR_IMAGE}
                         alt={teacher.name}
                       />
                       <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
@@ -368,7 +370,7 @@ export default function PeoplePage() {
                   >
                     <Avatar>
                       <AvatarImage
-                        src={student.image || avatarImage}
+                        src={student.image || AVATAR_IMAGE}
                         alt={student.name}
                       />
                       <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>

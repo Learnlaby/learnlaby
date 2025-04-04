@@ -5,6 +5,12 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { NotebookText, NotebookPen, Send } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import {
+  POST_DETAIL_API,
+  SUBMISSION_GET_API,
+  COMMENT_API,
+  SUBMISSION_CREATE_API
+} from "@/lib/api_routes";
 
 // Add interface for Comment
 interface Comment {
@@ -31,18 +37,13 @@ export default function ClassworkDetailPage() {
   const [commentContent, setCommentContent] = useState<string>("");
   const [submittingComment, setSubmittingComment] = useState<boolean>(false);
 
-  const detailAPI = "/api/classroom/posts/detail";
-  const getSubmissionAPI = "/api/classroom/submission/get";
-  const commentAPI = "/api/classroom/comment";
-  const createSubmissionAPI = "/api/classroom/submission/create";
-
   // Fetch classwork detail
   useEffect(() => {
     async function fetchClassworkDetails() {
       if (!postId) return;
 
       try {
-        const response = await fetch(detailAPI, {
+        const response = await fetch(POST_DETAIL_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ postId }),
@@ -67,7 +68,7 @@ export default function ClassworkDetailPage() {
     async function fetchSubmission() {
       if (!postId) return;
 
-      const res = await fetch(getSubmissionAPI, {
+      const res = await fetch(SUBMISSION_GET_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ postId }),
@@ -88,7 +89,7 @@ export default function ClassworkDetailPage() {
       if (!postId) return;
 
       try {
-        const response = await fetch(`${commentAPI}?postId=${postId}`);
+        const response = await fetch(`${COMMENT_API}?postId=${postId}`);
         if (!response.ok) {
           console.error("Failed to fetch comments for post", postId);
           return;
@@ -118,7 +119,7 @@ export default function ClassworkDetailPage() {
       formData.append("files", file);
     });
 
-    const response = await fetch(createSubmissionAPI, {
+    const response = await fetch(SUBMISSION_CREATE_API, {
       method: "POST",
       body: formData,
     });
@@ -139,7 +140,7 @@ export default function ClassworkDetailPage() {
     setSubmittingComment(true);
 
     try {
-      const response = await fetch(commentAPI, {
+      const response = await fetch(COMMENT_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

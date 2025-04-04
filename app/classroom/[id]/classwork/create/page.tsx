@@ -10,6 +10,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs from "dayjs";
+import {
+  SECTION_API,
+  ASSIGNMENT_CREATE_API,
+  MATERIAL_CREATE_API,
+  CLASSROOM_CLASSWORK_PAGE,
+} from "@/lib/api_routes";
 
 export default function CreateClasswork() {
   const params = useParams();
@@ -27,16 +33,11 @@ export default function CreateClasswork() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const router = useRouter();
 
-  const sectionAPI = "/api/classroom/posts/section";
-  const createAssimentAPI = "/api/classroom/posts/assignment/create";
-  const createMaterialAPI = "/api/classroom/posts/material/create";
-  const classworkPage = "/classroom/[classroomId]/classwork";
-
   useEffect(() => {
     async function fetchTopics() {
       if (!classroomId) return;
       try {
-        const response = await fetch(sectionAPI, {
+        const response = await fetch(SECTION_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -87,9 +88,9 @@ export default function CreateClasswork() {
 
       files.forEach((file) => formData.append("files", file)); // Attach selected files
 
-      let apiEndpoint = createAssimentAPI;
+      let apiEndpoint = ASSIGNMENT_CREATE_API; // Default to assignment API
       if (type === "Material") {
-        apiEndpoint = createMaterialAPI;
+        apiEndpoint = MATERIAL_CREATE_API; // Use material API for materials
       }
 
       const response = await fetch(apiEndpoint, {
@@ -101,7 +102,7 @@ export default function CreateClasswork() {
         throw new Error(`Failed to create ${type.toLowerCase()}.`);
       }
 
-      router.push(classworkPage.replace("[classroomId]", classroomId));
+      router.push(CLASSROOM_CLASSWORK_PAGE.replace("[id]", classroomId)); // Redirect to classwork page
     } catch (error) {
       console.error(`Error creating ${type.toLowerCase()}:`, error);
       alert(`Error creating ${type.toLowerCase()}.`);
@@ -116,7 +117,7 @@ export default function CreateClasswork() {
         <div className="flex items-center text-black-600 space-x-4">
           <Button
             className="text-purple-600 bg-transparent hover:bg-gray-200 px-2 py-1 rounded-md"
-            onClick={() => router.push(classworkPage.replace("[classroomId]", classroomId))}
+            onClick={() => router.push(CLASSROOM_CLASSWORK_PAGE.replace("[id]", classroomId))}
           >
             ← Back
           </Button>

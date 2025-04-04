@@ -5,13 +5,12 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import styles from '@/components/index.module.css'
+import { HOME_PAGE } from '@/lib/api_routes'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
-
-  const homePage = "/home"
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,7 +24,7 @@ export default function SignIn() {
       if (result && result.error) {
         console.error(result.error)
       } else {
-        router.push(homePage)
+        router.push(HOME_PAGE)
       }
     } catch (error) {
       console.error('Error signing in:', error)

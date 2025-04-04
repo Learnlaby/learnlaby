@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button"
 import { ArrowUpDown } from "lucide-react"
 import { useParams } from "next/navigation"
+import { SUBMISSION_ASSIGNMENT_API, PLACEHOLDER_IMAGE } from "@/lib/api_routes"
 
 export default function GradePage() {
   const { id: classroomId } = useParams()
@@ -15,14 +16,11 @@ export default function GradePage() {
   const [scores, setScores] = React.useState<{ [assignmentId: string]: { [studentId: string]: number | null } }>({})
   const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc")
 
-  const submissionAPI = "/api/classroom/posts/assignment/submission"
-  const avatarImage = "/placeholder.svg";
-
   React.useEffect(() => {
     if (!classroomId) return
 
     const fetchData = async () => {
-      const res = await fetch(submissionAPI, {
+      const res = await fetch(SUBMISSION_ASSIGNMENT_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId }),
@@ -60,7 +58,7 @@ export default function GradePage() {
         const formattedMembers = memberList.map((m: any) => ({
           id: m.id,
           name: m.name || "Unnamed",
-          avatar: m.image || avatarImage,
+          avatar: m.image || PLACEHOLDER_IMAGE,
         }))
 
         setAssignments(assignmentList)

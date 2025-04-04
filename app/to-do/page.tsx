@@ -3,6 +3,10 @@ import * as React from "react";
 import Layout from "@/components/layout";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import {
+  TODO_API,
+  CLASSWORK_DETAIL_PAGE
+} from "@/lib/api_routes";
 
 interface Assignment {
   id: string;
@@ -30,13 +34,10 @@ export default function WorkPage() {
   const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
 
-  const todoAPI = "/api/classroom/todo";
-  const classworkDetailPage = "/classroom/[assignment.classroomId]/classwork/detail/[assignment.id]";
-
   React.useEffect(() => {
     async function fetchAssignments() {
       try {
-        const response = await fetch(todoAPI);
+        const response = await fetch(TODO_API);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -106,8 +107,8 @@ export default function WorkPage() {
   };
 
   assignments.forEach((assignment) => {
-    if (assignment.status === "done") { // Check if the assignment is submitted
-      if (assignment.isLate) {  // Check if the assignment is submitted late, if so, add a note
+    if (assignment.status === "done") {
+      if (assignment.isLate) {
         const assignmentWithNote = {
           ...assignment,
           title: `${assignment.title}`
@@ -118,7 +119,7 @@ export default function WorkPage() {
       }
       assignmentGroups.done.count++;
     } 
-    else if (assignment.status === "missing") { // Check if the assignment is missing
+    else if (assignment.status === "missing") {
       assignmentGroups.missing.assignments.push(assignment);
       assignmentGroups.missing.count++;
     }
@@ -138,6 +139,13 @@ export default function WorkPage() {
     }
   });
 
+  const navigateToAssignmentDetail = (classroomId: string, assignmentId: string) => {
+    const path = CLASSWORK_DETAIL_PAGE
+      .replace("[classroomId]", classroomId)
+      .replace("[postId]", assignmentId);
+    router.push(path);
+  };
+
   return (
     <Layout>
       <div className="flex-1 space-y-4 p-4 md:p-8">
@@ -153,7 +161,11 @@ export default function WorkPage() {
               </div>
               <div className="space-y-1 flex-grow overflow-y-auto">
                 {group.assignments.map((assignment) => (
-                  <div key={assignment.id} className="p-3 border rounded-3xl bg-white cursor-pointer" onClick={() => router.push(classworkDetailPage.replace("[assignment.classroomId]", assignment.classroomId).replace("[assignment.id]", assignment.id))}>
+                  <div 
+                    key={assignment.id} 
+                    className="p-3 border rounded-3xl bg-white cursor-pointer" 
+                    onClick={() => navigateToAssignmentDetail(assignment.classroomId, assignment.id)}
+                  >
                     <div className="flex justify-between items-center">
                       <h4 className="text-sm font-medium mb-1">{assignment.title}</h4>
                       {assignment.isLate && key === "done" && (

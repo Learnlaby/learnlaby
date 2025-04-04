@@ -4,6 +4,11 @@ import { useSearchParams, useParams } from "next/navigation";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import {
+  SUBMISSION_REVIEW_API,
+  GRADE_API,
+} from "@/lib/api_routes";
+
 export default function StudentWorkPage() {
   const { studentId } = useParams();
   const searchParams = useSearchParams();
@@ -17,15 +22,12 @@ export default function StudentWorkPage() {
   const [score, setScore] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
 
-  const reviewAPI = "/api/classroom/submission/review";
-  const gradeAPI = "/api/classroom/submission/grade";
-
   useEffect(() => {
     const fetchSubmission = async () => {
       if (!submissionId) return;
 
       try {
-        const res = await fetch(reviewAPI, {
+        const res = await fetch(SUBMISSION_REVIEW_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ submissionId }),
@@ -59,7 +61,7 @@ export default function StudentWorkPage() {
     }
 
     try {
-      const res = await fetch(gradeAPI, {
+      const res = await fetch(GRADE_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

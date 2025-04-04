@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,15 @@ import { Label } from "@/components/ui/label";
 import { Plus, NotebookText, NotebookPen, Send } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { useSession } from "next-auth/react";
+import {
+  CLASSROOM_MEMBER_API,
+  CLASSWORK_API,
+  COMMENT_API,
+  SECTION_CREATE_API,
+  CLASSWORK_CREATE_PAGE,
+  CLASSWORK_REVIEW_PAGE,
+  CLASSWORK_DETAIL_PAGE,
+} from "@/lib/api_routes";
 
 // Add interfaces for our data models
 interface User {
@@ -85,15 +95,6 @@ export default function Classwork() {
 
   const isTeacher = userRole === "teacher" || userRole === "co-teacher";
 
-  const memberAPI = "/api/classroom/member";
-  const classworkAPI = "/api/classroom/posts/classworks";
-  const commentAPI = "/api/classroom/comment";
-  const createSectionAPI = "/api/classroom/posts/section/create";
-  const classworkCreatePage = "/classroom/[classroomId]/classwork/create";
-  const classworkReviewPage = "/classroom/[classroomId]/classwork/review/[postId]";
-  const classworkDetailPage = "/classroom/[classroomId]/classwork/detail/[postId]";
-
-
   useEffect(() => {
     async function fetchUserRole() {
       if (!classroomId || !session?.user?.email) {
@@ -102,7 +103,7 @@ export default function Classwork() {
       }
 
       try {
-        const response = await fetch(memberAPI, {
+        const response = await fetch(CLASSROOM_MEMBER_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -139,7 +140,7 @@ export default function Classwork() {
 
       try {
         // Fetch all classwork posts with section details
-        const classworkResponse = await fetch(classworkAPI, {
+        const classworkResponse = await fetch(CLASSWORK_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ classroomId }),
@@ -204,7 +205,7 @@ export default function Classwork() {
   // Function to fetch comments for a post
   const fetchComments = async (postId: string): Promise<Comment[]> => {
     try {
-      const response = await fetch(`${commentAPI}?postId=${postId}`);
+      const response = await fetch(`${COMMENT_API}?postId=${postId}`);
       if (!response.ok) {
         console.error("Failed to fetch comments for post", postId);
         return [];
@@ -223,7 +224,7 @@ export default function Classwork() {
     }
 
     try {
-      const response = await fetch(createSectionAPI, {
+      const response = await fetch(SECTION_CREATE_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classroomId, name: newSectionName }),
@@ -260,7 +261,7 @@ export default function Classwork() {
     }));
 
     try {
-      const response = await fetch(commentAPI, {
+      const response = await fetch(COMMENT_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -331,10 +332,10 @@ export default function Classwork() {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setShowSectionDialog(true)}>New Section</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(classworkCreatePage.replace("[classroomId]", classroomId) + "?type=Assignment")}>
+                <DropdownMenuItem onClick={() => router.push(CLASSWORK_CREATE_PAGE.replace("[classroomId]", classroomId) + "?type=Assignment")}>
                   Assignment
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push(classworkCreatePage.replace("[classroomId]", classroomId) + "?type=Material")}>
+                <DropdownMenuItem onClick={() => router.push(CLASSWORK_CREATE_PAGE.replace("[classroomId]", classroomId) + "?type=Material")}>
                   Material
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -383,7 +384,7 @@ export default function Classwork() {
                         <div>
                           <CardTitle
                             className="text-base font-medium cursor-pointer"
-                            onClick={() => router.push(classworkDetailPage.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
+                            onClick={() => router.push(CLASSWORK_DETAIL_PAGE.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
                           >
                             {post.title}
                           </CardTitle>
@@ -403,7 +404,7 @@ export default function Classwork() {
                         <Button
                           variant="outline"
                           className="text-purple-600 border-purple-600 hover:bg-purple-50 ml-4 whitespace-nowrap"
-                          onClick={() => router.push(classworkReviewPage.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
+                          onClick={() => router.push(CLASSWORK_REVIEW_PAGE.replace("[classroomId]", classroomId).replace("[postId]", post.id))}
                         >
                           Review Work
                         </Button>
@@ -423,10 +424,11 @@ export default function Classwork() {
                                 <div className="flex items-center gap-2">
                                   {comment.user.image && (
                                     <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                                      <img
+                                      <Image 
                                         src={comment.user.image}
                                         alt={comment.user.name || "User"}
-                                        className="w-full h-full object-cover"
+                                        layout="fill"
+                                        objectFit="cover"
                                       />
                                     </div>
                                   )}
