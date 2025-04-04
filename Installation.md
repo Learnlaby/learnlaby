@@ -1,7 +1,5 @@
 # Learnlaby Installation Guide
 
----
-
 ## Prerequisites
 
 ### Required Tools
@@ -14,7 +12,6 @@
 - **PostgreSQL / Neon / Vercel Postgres**  
   - [Neon](https://neon.tech/) or [Vercel Postgres](https://vercel.com/postgres)
 
----
 
 ## Environment Setup
 
@@ -38,14 +35,12 @@ Create a .env file in the project root (same level as package.json). Copy and pa
 ### 4. Generate Prisma client
 ``pnpm prisma generate``
 
----
 
 ## Development
 Run the development server:
 ``pnpm dev``
 The application will be available at http://localhost:3000/.
 
----
 
 ## Testing ** (wip)
 - Linting:
