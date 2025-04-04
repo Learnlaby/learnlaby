@@ -1,13 +1,6 @@
-"use client";
-import { useParams } from "next/navigation";
-import Layout from "@/components/layout";
+import { redirect } from "next/navigation";
+import { CLASSROOM_DEFAULT_REDIRECT } from "@/lib/api_routes";
 
-export default function ClassroomPage() {
-  const { classroomId } = useParams();
-
-  return (
-    <Layout>
-      <h1>Classroom {classroomId}</h1>
-    </Layout>
-  );
+export default function ClassroomPage({ params }: { params: { id: string } }) {
+  redirect(CLASSROOM_DEFAULT_REDIRECT(params.id));
 }
