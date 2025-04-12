@@ -96,7 +96,7 @@ export default function GradePage() {
   
     if (validScores.length === 0) return "0.0" // Graded assignment but no valid scores
   
-    const average = validScores.reduce((sum, score) => sum + score, 0) / validScores.length
+    const average = validScores.reduce((sum, score) => sum + Number(score), 0) / validScores.length
     return average.toFixed(1)
   }
    
